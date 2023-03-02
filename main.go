@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"bcc/App"
+)
 
 func main() {
-	fmt.Println("Hello World!")
+	App.Init()
+
 }
