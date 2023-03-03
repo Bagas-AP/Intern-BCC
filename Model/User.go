@@ -1,7 +1,7 @@
 package Model
 
 type User struct {
-	ID             uint   `gorm:"primary_key" json:"id"`
+	ID             uint   `gorm:"primaryKey" json:"id"`
 	Name           string `gorm:"not null;size:30" json:"name"`
 	Phone          string `gorm:"not null;unique" json:"phone"`
 	Email          string `gorm:"not null;unique" json:"email"`
@@ -11,6 +11,8 @@ type User struct {
 	Subdistrict    string `json:"subdistrict"`
 	Address        string `gorm:"not null;size:100" json:"address"` // Detailed Address
 	ProfilePicture string `json:"profile_picture"`
+	WalletID       uint   `json:"wallet_id"`
+	Wallet         Wallet `gorm:"ForeignKey:WalletID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 type UserRegister struct {

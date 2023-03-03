@@ -1,6 +1,7 @@
 package Middleware
 
 import (
+	"bcc/Utils"
 	"net/http"
 	"os"
 
@@ -13,16 +14,16 @@ func Authorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.Request.Header.Get("Authorization")
 		header = header[len("Bearer "):]
-		godotenv.Load("../.env")
+		if err := godotenv.Load("../.env"); err != nil {
+			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
+			c.Abort()
+			return
+		}
 		token, err := jwt.Parse(header, func(t *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("TOKEN_G")), nil
 		})
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": "JWT validation error.",
-				"error":   err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
 			c.Abort()
 			return
 		}
@@ -31,11 +32,7 @@ func Authorization() gin.HandlerFunc {
 			c.Next()
 			return
 		} else {
-			c.JSON(http.StatusForbidden, gin.H{
-				"success": false,
-				"message": "JWT invalid.",
-				"error":   err.Error(),
-			})
+			c.JSON(http.StatusForbidden, Utils.FailedResponse(err.Error()))
 			c.Abort()
 			return
 		}
