@@ -28,7 +28,7 @@ func MakeConnectionDatabase(data *Database) (*gorm.DB, error) {
 		&Model.LaundryMenu{},
 		&Model.LaundryPhotos{},
 		&Model.Favorite{},
-		&Model.UserOrder{},
+		&Model.UserLaundryOrder{},
 	); err != nil {
 		return nil, err
 	}

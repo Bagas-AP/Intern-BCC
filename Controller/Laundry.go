@@ -67,4 +67,55 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 			"menus":              menus,
 		}))
 	})
+
+	r.GET("/laundry/:laundry_id/laundryMenu/:id", Middleware.Authorization(), func(c *gin.Context) {
+		laundryID := c.Param("laundry_id")
+		id := c.Param("id")
+
+		var menu Model.LaundryMenu
+		if res := db.Where("laundry_id = ?", laundryID).Where("id = ?", id).First(&menu); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry menu by id", gin.H{
+			"data": menu,
+		}))
+	})
+
+	// add laundry order
+	r.POST("/laundry/:laundry_id/laundryMenu/:id", Middleware.Authorization(), func(c *gin.Context) {
+		laundryID := c.Param("laundry_id")
+		id, isIdExists := c.Params.Get("id")
+
+		if !isIdExists {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"message": "ID is not supplied.",
+			})
+			return
+		}
+
+		var menu Model.LaundryMenu
+		if res := db.Where("laundry_id = ?", laundryID).Where("id = ?", id).First(&menu); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		var input Model.InputLaundryOrder
+		if err := c.ShouldBindJSON(&input); err != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			return
+		}
+
+		input = Model.InputLaundryOrder{
+			LaundryMenuID: int(menu.ID),
+			LaundryID:     int(Utils.UintToString(id)),
+			Quantity:      input.Quantity,
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry menu by id", gin.H{
+			"data": input,
+		}))
+	})
 }
