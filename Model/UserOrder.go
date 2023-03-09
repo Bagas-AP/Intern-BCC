@@ -1,6 +1,9 @@
 package Model
 
-type UserLaundryOrder struct {
+import "github.com/google/uuid"
+
+type UserOrder struct {
+	ID              uuid.UUID   `gorm:"primaryKey" json:"id"`
 	User            User        `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	UserID          uint        `json:"user_id"`
 	Laundry         Laundry     `gorm:"ForeignKey:LaundryID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

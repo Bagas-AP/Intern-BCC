@@ -89,10 +89,7 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 		id, isIdExists := c.Params.Get("id")
 
 		if !isIdExists {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"success": false,
-				"message": "ID is not supplied.",
-			})
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse("id not found"))
 			return
 		}
 
