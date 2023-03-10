@@ -74,22 +74,101 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get laundry menu by id
-	r.GET("/laundry/:laundry_id/laundryMenu/:menu_id", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/laundry/:laundry_id/laundryMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
 		laundryID := c.Param("laundry_id")
-		menuID, err := Utils.ParseStrToUint(c.Param("menu_id"))
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_id"))
 		if err != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
 			return
 		}
 
 		var menu Model.LaundryMenu
-		if res := db.Where("laundry_id = ?", laundryID).Where("menu_index = ?", menuID).First(&menu); res.Error != nil {
+		if res := db.Where("laundry_id = ?", laundryID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
 			return
 		}
 
 		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry menu by id", gin.H{
 			"data": menu,
+		}))
+	})
+
+	// cepat baju sepatu tas karpet setrika
+	// search laundry by tag Cepat
+	r.GET("/searchLaundryTagCepat", Middleware.Authorization(), func(c *gin.Context) {
+		var laundries []Model.LaundryTags
+		if res := db.Where("tag = ?", "Cepat").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
+			"data": laundries,
+		}))
+	})
+
+	// search laundry by tag Baju
+	r.GET("/searchLaundryTagBaju", Middleware.Authorization(), func(c *gin.Context) {
+		var laundries []Model.LaundryTags
+		if res := db.Where("tag = ?", "Baju").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
+			"data": laundries,
+		}))
+	})
+
+	// search laundry by tag Sepatu
+	r.GET("/searchLaundryTagSepatu", Middleware.Authorization(), func(c *gin.Context) {
+		var laundries []Model.LaundryTags
+		if res := db.Where("tag = ?", "Sepatu").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
+			"data": laundries,
+		}))
+	})
+
+	// search laundry by tag Tas
+	r.GET("/searchLaundryTagTas", Middleware.Authorization(), func(c *gin.Context) {
+		var laundries []Model.LaundryTags
+		if res := db.Where("tag = ?", "Tas").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
+			"data": laundries,
+		}))
+	})
+
+	// search laundry by tag Karpet
+	r.GET("/searchLaundryTagKarpet", Middleware.Authorization(), func(c *gin.Context) {
+		var laundries []Model.LaundryTags
+		if res := db.Where("tag = ?", "Karpet").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
+			"data": laundries,
+		}))
+	})
+
+	// search laundry by tag Setrika
+	r.GET("/searchLaundryTagSetrika", Middleware.Authorization(), func(c *gin.Context) {
+		var laundries []Model.LaundryTags
+		if res := db.Where("tag = ?", "Setrika").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
+			"data": laundries,
 		}))
 	})
 

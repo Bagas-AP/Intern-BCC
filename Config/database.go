@@ -58,6 +58,7 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 		&Model.Seller{},
 		&Model.Laundry{},
 		&Model.LaundryMenu{},
+		&Model.LaundryTags{},
 		&Model.LaundryPhotos{},
 		&Model.Favorite{},
 		&Model.UserOrder{},
