@@ -3,6 +3,7 @@ package App
 import (
 	"bcc/Config"
 	"bcc/Controller"
+	"bcc/Middleware"
 	"fmt"
 	"net/http"
 	"os"
@@ -36,6 +37,9 @@ func Init() {
 	db, err := Config.MakeLocalhostConnectionDatabase(databaseConf)
 	fmt.Println("Database Connected")
 	r := gin.Default()
+
+	// cors
+	r.Use(Middleware.CORS())
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

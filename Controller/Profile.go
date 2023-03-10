@@ -44,13 +44,13 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 
 		ID, _ := c.Get("id")
 
-		var user Model.User
-		if err := db.Where("id = ?", ID).Take(&user); err != nil {
-			c.JSON(http.StatusNotFound, Utils.FailedResponse(err.Error.Error()))
-			return
-		}
+		//var user Model.User
+		//if err := db.Where("id = ?", ID).Take(&user); err != nil {
+		//	c.JSON(http.StatusNotFound, Utils.FailedResponse(err.Error.Error()))
+		//	return
+		//}
 
-		user = Model.User{
+		user := Model.User{
 			Name:           input.Name,
 			Phone:          input.Phone,
 			Email:          input.Email,
@@ -63,8 +63,8 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 			UpdatedAt:      time.Now(),
 		}
 
-		if err := db.Where("id = ?", ID).Model(&user).Updates(user); err != nil {
-			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error.Error()))
+		if err := db.Where("id = ?", ID).Model(&user).Updates(user).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
 			return
 		}
 
