@@ -20,15 +20,23 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 			c.JSON(http.StatusNotFound, Utils.FailedResponse(err.Error()))
 			return
 		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get all catering", gin.H{
+			"data": caterings,
+		}))
 	})
 
 	// search catering by name
 	r.POST("/searchCatering", Middleware.Authorization(), func(c *gin.Context) {
-		name, _ := c.GetQuery("name")
+		var input Model.CateringSearch
+		if err := c.BindJSON(&input); err != nil {
+			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			return
+		}
 
 		var caterings []Model.Catering
 
-		if res := db.Where("name LIKE ?", "%"+name+"%").Find(&caterings); res.Error != nil {
+		if res := db.Where("name LIKE ?", "%"+input.Name+"%").Find(&caterings); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
 			return
 		}
@@ -55,7 +63,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 		}
 
 		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by id", gin.H{
-			"laundry_name":        catering.Name,
+			"catering_name":       catering.Name,
 			"catering_address":    catering.Address,
 			"catering_phone":      catering.Phone,
 			"catering_instagram":  catering.Instagram,
@@ -66,12 +74,16 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get catering menu by id
-	r.GET("/catering/:catering_id/cateringMenu/:menu_id", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/catering/:catering_id/cateringMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
 		CateringID := c.Param("catering_id")
-		id := c.Param("menu_id")
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			return
+		}
 
 		var menu Model.CateringMenu
-		if res := db.Where("catering_id = ?", CateringID).Where("id = ?", id).First(&menu); res.Error != nil {
+		if res := db.Where("catering_id = ?", CateringID).Where("id = ?", menuIndex).First(&menu); res.Error != nil {
 			c.JSON(http.StatusNotFound, Utils.FailedResponse(res.Error.Error()))
 			return
 		}
@@ -82,12 +94,16 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get detailed catering menu by id
-	r.GET("/catering/:catering_id/cateringMenu/:menu_id/detailed", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/catering/:catering_id/cateringMenu/:menu_index/detailed", Middleware.Authorization(), func(c *gin.Context) {
 		CateringID := c.Param("catering_id")
-		id := c.Param("menu_id")
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			return
+		}
 
 		var detailedMenu Model.CateringMenuDetailed
-		if res := db.Where("catering_id = ?", CateringID).Where("id = ?", id).First(&detailedMenu); res.Error != nil {
+		if res := db.Where("catering_id = ?", CateringID).Where("catering_menu_id = ?", menuIndex).First(&detailedMenu); res.Error != nil {
 			c.JSON(http.StatusNotFound, Utils.FailedResponse(res.Error.Error()))
 			return
 		}

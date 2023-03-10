@@ -53,8 +53,5 @@ func Init() {
 	Controller.UserLaundry(db, r)
 	Controller.UserCatering(db, r)
 
-	fmt.Println(db)
-	fmt.Println("Cuma print db kok")
-
 	r.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }

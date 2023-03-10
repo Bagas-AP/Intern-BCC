@@ -4,6 +4,7 @@ type CateringMenu struct {
 	ID          uint     `gorm:"primaryKey" json:"id"`
 	Catering    Catering `gorm:"ForeignKey:CateringID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	CateringID  uint     `json:"catering_id"`
+	MenuIndex   int      `json:"menu_index"`
 	Name        string   `gorm:"size:30;not null" json:"name"`
 	Description string   `gorm:"size:255" json:"description"`
 	Price       int      `json:"price"`

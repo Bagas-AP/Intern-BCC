@@ -19,13 +19,11 @@ func Authorization() gin.HandlerFunc {
 			return []byte(os.Getenv("TOKEN")), nil
 		})
 		if err != nil {
-			log.Println("seteleah jwt.Parse")
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
 			c.Abort()
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-			log.Println("masuk ke if")
 			c.Set("id", uint(claims["id"].(float64)))
 			c.Next()
 			return

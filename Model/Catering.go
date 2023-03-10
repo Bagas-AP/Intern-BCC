@@ -12,3 +12,7 @@ type Catering struct {
 	Phone       string `json:"phone"`
 	PriceRange  string `json:"price_range"`
 }
+
+type CateringSearch struct {
+	Name string `json:"name"`
+}
