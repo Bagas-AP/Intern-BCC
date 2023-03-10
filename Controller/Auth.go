@@ -5,13 +5,14 @@ import (
 	"bcc/Utils"
 	"crypto/sha512"
 	"encoding/hex"
+	"github.com/joho/godotenv"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
 
@@ -24,7 +25,19 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		if err := db.Create(&input).Error; err != nil {
+		newUser := Model.User{
+			Name:        input.Name,
+			Phone:       input.Phone,
+			Email:       input.Email,
+			Password:    Hash(input.Password),
+			Province:    input.Province,
+			City:        input.City,
+			Subdistrict: input.Subdistrict,
+			Address:     input.Address,
+			CreatedAt:   time.Now(),
+		}
+
+		if err := db.Create(&newUser).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
 			return
 		}
@@ -57,18 +70,32 @@ func Login(db *gorm.DB, q *gin.Engine) {
 				"exp": time.Now().Add(time.Hour * 7 * 24).Unix(),
 			})
 
-			if err := godotenv.Load("../.env"); err != nil {
-				c.JSON(http.StatusInternalServerError, err.Error())
-				return
-			}
+			//err := godotenv.Load()
+			//if err != nil {
+			//	c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
+			//	return
+			//}
 
-			strToken, err := token.SignedString([]byte(os.Getenv("TOKEN_G")))
+			//if err := godotenv.Load("../.env"); err != nil {
+			//	log.Println("ngeload env")
+			//	log.Println(err)
+			//	c.JSON(http.StatusInternalServerError, err.Error())
+			//	return
+			//}
+
+			log.Println("lg load")
+			godotenv.Load("../.env")
+			log.Println("selese load")
+
+			strToken, err := token.SignedString([]byte(os.Getenv("TOKEN")))
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, err.Error())
+				log.Println("signed string")
+				log.Println(err)
+				c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
 				return
 			}
 
-			c.JSON(http.StatusOK, Utils.SucceededReponse("Welcome, take your token", gin.H{
+			c.JSON(http.StatusOK, Utils.SucceededReponse("Success", gin.H{
 				"name":  login.Name,
 				"token": strToken,
 			}))

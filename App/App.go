@@ -2,6 +2,7 @@ package App
 
 import (
 	"bcc/Config"
+	"bcc/Controller"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,16 +17,24 @@ func Init() {
 		panic(err.Error())
 	}
 
-	databaseConf, err := Config.NewDatabase()
-	if err != nil {
-		panic(err.Error())
-	}
-	db, err := Config.MakeConnectionDatabase(databaseConf)
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Println("Database Connected")
+	// supabase
+	//databaseConf, err := Config.NewDatabase()
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//db, err := Config.MakeSupaBaseConnectionDatabase(databaseConf)
+	//if err != nil {
+	//	panic(err.Error())
+	//}
+	//fmt.Println("Database Connected")
 
+	// localhost
+	databaseConf, err := Config.NewDBLocal()
+	if err != nil {
+		panic(err.Error())
+	}
+	db, err := Config.MakeLocalhostConnectionDatabase(databaseConf)
+	fmt.Println("Database Connected")
 	r := gin.Default()
 
 	r.GET("/", func(c *gin.Context) {
@@ -33,6 +42,12 @@ func Init() {
 			"message": "Hello World!",
 		})
 	})
+
+	Controller.Register(db, r)
+	Controller.Login(db, r)
+	Controller.Profile(db, r)
+	Controller.UserLaundry(db, r)
+	Controller.UserCatering(db, r)
 
 	fmt.Println(db)
 	fmt.Println("Cuma print db kok")

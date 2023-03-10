@@ -1,5 +1,7 @@
 package Model
 
+import "time"
+
 type User struct {
 	ID             uint   `gorm:"primaryKey" json:"id"`
 	Name           string `gorm:"not null;size:30" json:"name"`
@@ -11,8 +13,10 @@ type User struct {
 	Subdistrict    string `json:"subdistrict"`
 	Address        string `gorm:"not null;size:100" json:"address"` // Detailed Address
 	ProfilePicture string `json:"profile_picture"`
-	WalletID       uint   `json:"wallet_id"`
-	Wallet         Wallet `gorm:"ForeignKey:WalletID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	//WalletID       uint   `json:"wallet_id"`
+	//Wallet         Wallet `gorm:"ForeignKey:WalletID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type UserRegister struct {
@@ -28,6 +32,8 @@ type UserRegister struct {
 
 type UserUpdate struct {
 	Name        string `gorm:"not null;size:30" json:"name"`
+	Phone       string `gorm:"not null;unique" json:"phone"`
+	Email       string `gorm:"not null;unique" json:"email"`
 	Password    string `gorm:"not null" json:"password"`
 	Province    string `json:"province"`
 	City        string `json:"city"`

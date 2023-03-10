@@ -30,6 +30,24 @@ func NewDatabase() (*Database, error) {
 	return &cfgDb, err
 }
 
+type DBLocal struct {
+	DbUser     string
+	DbPassword string
+	DbHost     string
+	DbName     string
+}
+
+func NewDBLocal() (*DBLocal, error) {
+	var err error
+	cfgDb := DBLocal{
+		DbUser:     os.Getenv("DB_USER"),
+		DbPassword: os.Getenv("DB_PASS"),
+		DbHost:     os.Getenv("DB_HOST"),
+		DbName:     os.Getenv("DB_NAME"),
+	}
+	return &cfgDb, err
+}
+
 func (db Database) validate() error {
 	return validation.ValidateStruct(
 		&db,
