@@ -84,7 +84,9 @@ func Login(db *gorm.DB, q *gin.Engine) {
 			//}
 
 			log.Println("lg load")
+			log.Println(os.Getenv("TOKEN"))
 			godotenv.Load("../.env")
+			log.Println(os.Getenv("TOKEN"))
 			log.Println("selese load")
 
 			strToken, err := token.SignedString([]byte(os.Getenv("TOKEN")))

@@ -5,6 +5,7 @@ import (
 	"bcc/Model"
 	"bcc/Utils"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,6 +13,8 @@ import (
 
 func Profile(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api")
+
+	// see user profile
 	r.GET("/profile", Middleware.Authorization(), func(c *gin.Context) {
 		ID, _ := c.Get("id")
 
@@ -31,7 +34,14 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 		}))
 	})
 
+	// edit user profile
 	r.PATCH("/profile", Middleware.Authorization(), func(c *gin.Context) {
+		var input Model.UserUpdate
+		if err := c.BindJSON(&input); err != nil {
+			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			return
+		}
+
 		ID, _ := c.Get("id")
 
 		var user Model.User
@@ -40,10 +50,28 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		var input Model.UserUpdate
-		if err := c.BindJSON(&input); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+		user = Model.User{
+			Name:           input.Name,
+			Phone:          input.Phone,
+			Email:          input.Email,
+			Password:       Hash(input.Password),
+			Province:       input.Province,
+			City:           input.City,
+			Subdistrict:    input.Subdistrict,
+			Address:        input.Address,
+			ProfilePicture: input.ProfilePicture,
+			UpdatedAt:      time.Now(),
+		}
+
+		if err := db.Where("id = ?", ID).Model(&user).Updates(user); err != nil {
+			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error.Error()))
 			return
 		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Profile updated successfully", gin.H{
+			"success": true,
+			"data":    user,
+		}))
+
 	})
 }
