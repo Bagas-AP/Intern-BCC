@@ -63,6 +63,7 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 		&Model.Catering{},
 		&Model.CateringMenu{},
 		&Model.CateringMenuDetailed{},
+		&Model.CateringTags{},
 		&Model.Favorite{},
 		&Model.UserOrder{},
 		//&Model.WalletTransaction{},

@@ -113,9 +113,8 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 		}))
 	})
 
-	// hemat vegetarian diet sehat halal
 	// get catering tag hemat
-	r.GET("/searchLaundryTagHemat", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/searchCateringTagHemat", Middleware.Authorization(), func(c *gin.Context) {
 		var caterings []Model.CateringTags
 		if res := db.Where("tag = ?", "Hemat").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
@@ -128,7 +127,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get catering tag vegetarian
-	r.GET("/searchLaundryTagVegetarian", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/searchCateringTagVegetarian", Middleware.Authorization(), func(c *gin.Context) {
 		var caterings []Model.CateringTags
 		if res := db.Where("tag = ?", "Vegetarian").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
@@ -141,7 +140,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get catering tag diet
-	r.GET("/searchLaundryTagDiet", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/searchCateringTagDiet", Middleware.Authorization(), func(c *gin.Context) {
 		var caterings []Model.CateringTags
 		if res := db.Where("tag = ?", "Diet").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
@@ -154,7 +153,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get catering tag sehat
-	r.GET("/searchLaundryTagSehat", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/searchCateringTagSehat", Middleware.Authorization(), func(c *gin.Context) {
 		var caterings []Model.CateringTags
 		if res := db.Where("tag = ?", "Sehat").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
@@ -167,7 +166,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// get catering tag halal
-	r.GET("/searchLaundryTagHalal", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/searchCateringTagHalal", Middleware.Authorization(), func(c *gin.Context) {
 		var caterings []Model.CateringTags
 		if res := db.Where("tag = ?", "Halal").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
