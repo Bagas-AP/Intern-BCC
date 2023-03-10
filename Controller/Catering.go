@@ -115,4 +115,67 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 
 	// hemat vegetarian diet sehat halal
 	// get catering tag hemat
+	r.GET("/searchLaundryTagHemat", Middleware.Authorization(), func(c *gin.Context) {
+		var caterings []Model.CateringTags
+		if res := db.Where("tag = ?", "Hemat").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get caterings by tags", gin.H{
+			"data": caterings,
+		}))
+	})
+
+	// get catering tag vegetarian
+	r.GET("/searchLaundryTagVegetarian", Middleware.Authorization(), func(c *gin.Context) {
+		var caterings []Model.CateringTags
+		if res := db.Where("tag = ?", "Vegetarian").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get caterings by tags", gin.H{
+			"data": caterings,
+		}))
+	})
+
+	// get catering tag diet
+	r.GET("/searchLaundryTagDiet", Middleware.Authorization(), func(c *gin.Context) {
+		var caterings []Model.CateringTags
+		if res := db.Where("tag = ?", "Diet").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get caterings by tags", gin.H{
+			"data": caterings,
+		}))
+	})
+
+	// get catering tag sehat
+	r.GET("/searchLaundryTagSehat", Middleware.Authorization(), func(c *gin.Context) {
+		var caterings []Model.CateringTags
+		if res := db.Where("tag = ?", "Sehat").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get caterings by tags", gin.H{
+			"data": caterings,
+		}))
+	})
+
+	// get catering tag halal
+	r.GET("/searchLaundryTagHalal", Middleware.Authorization(), func(c *gin.Context) {
+		var caterings []Model.CateringTags
+		if res := db.Where("tag = ?", "Halal").Preload("Catering.Seller").Find(&caterings); res.Error != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			return
+		}
+
+		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get caterings by tags", gin.H{
+			"data": caterings,
+		}))
+	})
 }
