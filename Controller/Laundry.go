@@ -93,7 +93,6 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 		}))
 	})
 
-	// cepat baju sepatu tas karpet setrika
 	// search laundry by tag Cepat
 	r.GET("/searchLaundryTagCepat", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags

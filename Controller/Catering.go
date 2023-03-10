@@ -112,4 +112,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 			"menu": detailedMenu,
 		}))
 	})
+
+	// hemat vegetarian diet sehat halal
+	// get catering tag hemat
 }
