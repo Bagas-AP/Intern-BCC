@@ -27,11 +27,16 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 
 	// search laundry by name
 	r.POST("/searchLaundry", Middleware.Authorization(), func(c *gin.Context) {
-		name, _ := c.GetQuery("name")
+		var input Model.LaundrySearch
+
+		if err := c.BindJSON(&input); err != nil {
+			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			return
+		}
 
 		var laundries []Model.Laundry
 
-		if res := db.Where("name LIKE ?", "%"+name+"%").Find(&laundries); res.Error != nil {
+		if res := db.Where("name LIKE ?", "%"+input.Name+"%").Find(&laundries); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
 			return
 		}
@@ -71,10 +76,14 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 	// get laundry menu by id
 	r.GET("/laundry/:laundry_id/laundryMenu/:menu_id", Middleware.Authorization(), func(c *gin.Context) {
 		laundryID := c.Param("laundry_id")
-		id := c.Param("menu_id")
+		menuID, err := Utils.ParseStrToUint(c.Param("menu_id"))
+		if err != nil {
+			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			return
+		}
 
 		var menu Model.LaundryMenu
-		if res := db.Where("laundry_id = ?", laundryID).Where("id = ?", id).First(&menu); res.Error != nil {
+		if res := db.Where("laundry_id = ?", laundryID).Where("menu_index = ?", menuID).First(&menu); res.Error != nil {
 			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
 			return
 		}
@@ -108,8 +117,8 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 
 		input = Model.InputLaundryOrder{
 			LaundryMenuID: int(menu.ID),
-			LaundryID:     int(Utils.UintToString(id)),
-			Quantity:      input.Quantity,
+			//LaundryID:     int(Utils.UintToString(id)),
+			Quantity: input.Quantity,
 		}
 
 		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry menu by id", gin.H{

@@ -55,14 +55,14 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 
 	if err := db.AutoMigrate(
 		&Model.User{},
-		//&Model.WalletTransaction{},
-		//&Model.Wallet{},
 		&Model.Seller{},
 		&Model.Laundry{},
 		&Model.LaundryMenu{},
 		&Model.LaundryPhotos{},
 		&Model.Favorite{},
 		&Model.UserOrder{},
+		//&Model.WalletTransaction{},
+		//&Model.Wallet{},
 	); err != nil {
 		return nil, err
 	}

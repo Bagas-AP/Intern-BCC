@@ -12,3 +12,7 @@ type Laundry struct {
 	Phone       string `json:"phone"`
 	PriceRange  string `json:"price_range"`
 }
+
+type LaundrySearch struct {
+	Name string `json:"name"`
+}

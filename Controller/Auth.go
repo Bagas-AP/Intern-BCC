@@ -5,8 +5,6 @@ import (
 	"bcc/Utils"
 	"crypto/sha512"
 	"encoding/hex"
-	"github.com/joho/godotenv"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -70,29 +68,8 @@ func Login(db *gorm.DB, q *gin.Engine) {
 				"exp": time.Now().Add(time.Hour * 7 * 24).Unix(),
 			})
 
-			//err := godotenv.Load()
-			//if err != nil {
-			//	c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
-			//	return
-			//}
-
-			//if err := godotenv.Load("../.env"); err != nil {
-			//	log.Println("ngeload env")
-			//	log.Println(err)
-			//	c.JSON(http.StatusInternalServerError, err.Error())
-			//	return
-			//}
-
-			log.Println("lg load")
-			log.Println(os.Getenv("TOKEN"))
-			godotenv.Load("../.env")
-			log.Println(os.Getenv("TOKEN"))
-			log.Println("selese load")
-
 			strToken, err := token.SignedString([]byte(os.Getenv("TOKEN")))
 			if err != nil {
-				log.Println("signed string")
-				log.Println(err)
 				c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
 				return
 			}

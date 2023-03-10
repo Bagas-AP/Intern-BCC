@@ -8,19 +8,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
-	"github.com/joho/godotenv"
 )
 
 func Authorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		header := c.Request.Header.Get("Authorization")
 		header = header[len("Bearer "):]
-		//if err := godotenv.Load("../.env"); err != nil {
-		//	c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
-		//	c.Abort()
-		//	return
-		//}
-		godotenv.Load("../.env")
+
 		token, err := jwt.Parse(header, func(t *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("TOKEN")), nil
 		})
