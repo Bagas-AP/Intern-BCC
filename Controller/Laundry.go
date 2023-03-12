@@ -71,8 +71,12 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 
 	// get laundry menu by id
 	r.GET("/laundry/:laundry_id/laundryMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
-		laundryID := c.Param("laundry_id")
-		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_id"))
+		laundryID, err := Utils.ParseStrToUint(c.Param("laundry_id"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
 		if err != nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return

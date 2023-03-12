@@ -17,14 +17,42 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 	// get all fav
 	r.GET("/all", Middleware.Authorization(), func(c *gin.Context) {
 		ID, _ := c.Get("id")
-
-		var favourites []Model.Favourite
-		if res := db.Where("user_id = ?", ID.(uint)).Find(&favourites); res.Error != nil {
+		var favs []Model.Favourite
+		if res := db.Where("user_id = ?", ID).Find(&favs); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "Queried all favourite", favourites)
+		var favResults []Model.FavouriteResult
+
+		for _, fav := range favs {
+			if fav.Model == 1 {
+				var menu Model.LaundryMenu
+				if res := db.Where("laundry_id = ?", fav.ServiceID).Where("menu_index = ?", fav.MenuID).First(&menu); res.Error != nil {
+					Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+					return
+				}
+				favResults = append(favResults, Model.FavouriteResult{
+					MenuName:  menu.Name,
+					MenuPrice: menu.Price,
+					MenuPhoto: menu.Photo,
+				})
+
+			} else if fav.Model == 2 {
+				var menu Model.CateringMenu
+				if res := db.Where("catering_id = ?", fav.ServiceID).Where("menu_index = ?", fav.MenuID).First(&menu); res.Error != nil {
+					Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+					return
+				}
+				favResults = append(favResults, Model.FavouriteResult{
+					MenuName:  menu.Name,
+					MenuPrice: menu.Price,
+					MenuPhoto: menu.Photo,
+				})
+			}
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "Get all favourite", favResults)
 	})
 
 	// add to fav catering menu by id

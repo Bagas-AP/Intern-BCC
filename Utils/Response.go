@@ -40,7 +40,7 @@ func HttpRespFailed(c *gin.Context, status int, message string) {
 	resp := Response{
 		Success: false,
 		Data:    nil,
-		Message: message,
+		Error:   message,
 	}
 
 	c.JSON(status, resp)

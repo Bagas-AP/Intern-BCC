@@ -79,7 +79,7 @@ func UserCatering(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var menu Model.CateringMenu
-		if res := db.Where("catering_id = ?", CateringID).Where("id = ?", menuIndex).First(&menu); res.Error != nil {
+		if res := db.Where("catering_id = ?", CateringID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
