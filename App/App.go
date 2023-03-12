@@ -52,6 +52,7 @@ func Init() {
 	Controller.Profile(db, r)
 	Controller.UserLaundry(db, r)
 	Controller.UserCatering(db, r)
+	Controller.Favourite(db, r)
 
 	r.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
 }

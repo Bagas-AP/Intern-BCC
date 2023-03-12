@@ -3,10 +3,11 @@ package Config
 import (
 	"bcc/Model"
 	"fmt"
+	"log"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func MakeSupaBaseConnectionDatabase(data *Database) (*gorm.DB, error) {
@@ -31,7 +32,7 @@ func MakeSupaBaseConnectionDatabase(data *Database) (*gorm.DB, error) {
 		&Model.Laundry{},
 		&Model.LaundryMenu{},
 		&Model.LaundryPhotos{},
-		&Model.Favorite{},
+		&Model.Favourite{},
 		&Model.UserOrder{},
 	); err != nil {
 		return nil, err
@@ -64,7 +65,7 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 		&Model.CateringMenu{},
 		&Model.CateringMenuDetailed{},
 		&Model.CateringTags{},
-		&Model.Favorite{},
+		&Model.Favourite{},
 		&Model.UserOrder{},
 		//&Model.WalletTransaction{},
 		//&Model.Wallet{},
