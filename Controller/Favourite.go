@@ -124,7 +124,7 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 		}
 
 		if res := db.Create(&favourite); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
 			return
 		}
 
@@ -148,22 +148,18 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 		favourite := Model.Favourite{
 			UserID:    ID.(uint),
 			Model:     1,
-			ServiceID: int(laundryID),
-			MenuID:    int(menuIndex),
+			ServiceID: laundryID,
+			MenuID:    menuIndex,
 		}
 
-		var isExistFavourite bool
-		if err := db.Where("user_id = ?", ID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, "Menu isn't favourite")
+		var isExistFavourite Model.Favourite
+
+		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).Delete(&isExistFavourite).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		if res := db.Delete(&favourite); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-			return
-		}
-
-		Utils.HttpRespSuccess(c, http.StatusOK, "removed laundry menu from favourite", favourite)
+		Utils.HttpRespSuccess(c, http.StatusOK, "removed laundry menu from favourite", "")
 	})
 
 	// remove favourite catering menu by id
@@ -188,16 +184,12 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var isExistFavourite Model.Favourite
-		if err := db.Where("user_id = ?", ID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, "Menu isn't favourite")
+
+		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).Delete(&isExistFavourite).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		if res := db.Delete(&favourite); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-			return
-		}
-
-		Utils.HttpRespSuccess(c, http.StatusOK, "removed catering menu from favourite", favourite)
+		Utils.HttpRespSuccess(c, http.StatusOK, "removed catering menu from favourite", "")
 	})
 }
