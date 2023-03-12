@@ -9,8 +9,9 @@ type Favourite struct {
 }
 
 type FavouriteResult struct {
-	//ServiceID uint   `json:"service_id"`
-	//MenuID    uint   `json:"menu_id"`
+	ModelID   int    `json:"model_id"`
+	ServiceID int    `json:"service_id"`
+	MenuID    int    `json:"menu_id"`
 	MenuName  string `json:"menu_name"`
 	MenuPrice int    `json:"menu_price"`
 	MenuPhoto string `json:"menu_photo"`
