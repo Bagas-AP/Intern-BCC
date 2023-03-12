@@ -153,6 +153,10 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var isExistFavourite Model.Favourite
+		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, "favourite doesn't exist")
+			return
+		}
 
 		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).Delete(&isExistFavourite).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
@@ -184,6 +188,10 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 		}
 
 		var isExistFavourite Model.Favourite
+		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, "favourite doesn't exist")
+			return
+		}
 
 		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).Delete(&isExistFavourite).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
