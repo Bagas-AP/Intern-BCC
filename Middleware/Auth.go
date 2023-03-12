@@ -19,7 +19,7 @@ func Authorization() gin.HandlerFunc {
 			return []byte(os.Getenv("TOKEN")), nil
 		})
 		if err != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			c.Abort()
 			return
 		}
@@ -29,7 +29,7 @@ func Authorization() gin.HandlerFunc {
 			return
 		} else {
 			log.Println("masuk ke else")
-			c.JSON(http.StatusForbidden, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusForbidden, err.Error())
 			c.Abort()
 			return
 		}

@@ -3,8 +3,6 @@ package Controller
 import (
 	"bcc/Model"
 	"bcc/Utils"
-	"crypto/sha512"
-	"encoding/hex"
 	"net/http"
 	"os"
 	"time"
@@ -19,7 +17,7 @@ func Register(db *gorm.DB, q *gin.Engine) {
 	r.POST("/register", func(c *gin.Context) {
 		var input Model.UserRegister
 		if err := c.BindJSON(&input); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
@@ -27,7 +25,7 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			Name:        input.Name,
 			Phone:       input.Phone,
 			Email:       input.Email,
-			Password:    Hash(input.Password),
+			Password:    Utils.Hash(input.Password),
 			Province:    input.Province,
 			City:        input.City,
 			Subdistrict: input.Subdistrict,
@@ -36,13 +34,11 @@ func Register(db *gorm.DB, q *gin.Engine) {
 		}
 
 		if err := db.Create(&newUser).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Account created successfully", gin.H{
-			"data": input,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusCreated, "Account created", input)
 	})
 }
 
@@ -52,17 +48,17 @@ func Login(db *gorm.DB, q *gin.Engine) {
 	r.POST("/login", func(c *gin.Context) {
 		var input Model.UserLogin
 		if err := c.BindJSON(&input); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
 		login := Model.User{}
 		if err := db.Where("phone = ?", input.Phone).First(&login).Error; err != nil {
-			c.JSON(http.StatusNotFound, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
 
-		if login.Password == Hash(input.Password) {
+		if login.Password == Utils.Hash(input.Password) {
 			token := jwt.NewWithClaims(jwt.SigningMethodHS512, jwt.MapClaims{
 				"id":  login.ID,
 				"exp": time.Now().Add(time.Hour * 7 * 24).Unix(),
@@ -70,26 +66,18 @@ func Login(db *gorm.DB, q *gin.Engine) {
 
 			strToken, err := token.SignedString([]byte(os.Getenv("TOKEN")))
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
+				Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 				return
 			}
 
-			c.JSON(http.StatusOK, Utils.SucceededReponse("Success", gin.H{
+			Utils.HttpRespSuccess(c, http.StatusOK, "Parsed token", gin.H{
 				"name":  login.Name,
 				"token": strToken,
-			}))
-			return
+			})
 
 		} else {
-			c.JSON(http.StatusForbidden, Utils.FailedResponse("Wrong password"))
+			Utils.HttpRespFailed(c, http.StatusForbidden, "Wrong password")
 			return
 		}
 	})
-}
-
-func Hash(password string) string {
-	hash := sha512.New()
-	hash.Write([]byte(password))
-	pw := hex.EncodeToString(hash.Sum(nil))
-	return pw
 }

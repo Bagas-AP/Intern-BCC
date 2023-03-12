@@ -16,13 +16,11 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 	r.GET("/allLaundry", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.Laundry
 		if err := db.Find(&laundries).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get all laundry", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried all laundry", laundries)
 	})
 
 	// search laundry by name
@@ -30,20 +28,18 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 		var input Model.LaundrySearch
 
 		if err := c.BindJSON(&input); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
 		var laundries []Model.Laundry
 
 		if res := db.Where("name LIKE ?", "%"+input.Name+"%").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by name", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundries by name", laundries)
 	})
 
 	// get laundry by id and all its menu
@@ -52,17 +48,17 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 
 		var laundry Model.Laundry
 		if res := db.Where("id = ?", id).First(&laundry); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
 		var menus []Model.LaundryMenu
 		if res := db.Where("laundry_id = ?", laundry.ID).Find(&menus); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by id", gin.H{
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by id", gin.H{
 			"laundry_name":       laundry.Name,
 			"laundry_address":    laundry.Address,
 			"laundry_phone":      laundry.Phone,
@@ -70,7 +66,7 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 			"laundry_rating":     laundry.Rating,
 			"laundry_priceRange": laundry.PriceRange,
 			"menus":              menus,
-		}))
+		})
 	})
 
 	// get laundry menu by id
@@ -78,97 +74,83 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 		laundryID := c.Param("laundry_id")
 		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_id"))
 		if err != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		var menu Model.LaundryMenu
 		if res := db.Where("laundry_id = ?", laundryID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry menu by id", gin.H{
-			"data": menu,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry menu by id", menu)
 	})
 
 	// search laundry by tag Cepat
 	r.GET("/searchLaundryTagCepat", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Cepat").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
 
 	// search laundry by tag Baju
 	r.GET("/searchLaundryTagBaju", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Baju").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
 
 	// search laundry by tag Sepatu
 	r.GET("/searchLaundryTagSepatu", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Sepatu").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
 
 	// search laundry by tag Tas
 	r.GET("/searchLaundryTagTas", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Tas").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
 
 	// search laundry by tag Karpet
 	r.GET("/searchLaundryTagKarpet", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Karpet").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
 
 	// search laundry by tag Setrika
 	r.GET("/searchLaundryTagSetrika", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Setrika").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry by tags", gin.H{
-			"data": laundries,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
 
 	// add laundry order
@@ -177,19 +159,19 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 		id, isIdExists := c.Params.Get("menu_id")
 
 		if !isIdExists {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse("id not found"))
+			Utils.HttpRespFailed(c, http.StatusBadRequest, "id not found")
 			return
 		}
 
 		var menu Model.LaundryMenu
 		if res := db.Where("laundry_id = ?", laundryID).Where("id = ?", id).First(&menu); res.Error != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(res.Error.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
 		var input Model.InputLaundryOrder
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusBadRequest, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -199,8 +181,6 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 			Quantity: input.Quantity,
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Success get laundry menu by id", gin.H{
-			"data": input,
-		}))
+		Utils.HttpRespSuccess(c, http.StatusOK, "Success get laundry menu by id", input)
 	})
 }

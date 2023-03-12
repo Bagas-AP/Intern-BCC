@@ -20,25 +20,24 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 
 		var user Model.User
 		if err := db.Where("id = ?", ID).Take(&user).Error; err != nil {
-			c.JSON(http.StatusNotFound, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Profile fetched successfully", gin.H{
-			"success": true,
-			// "data":    user,
+		Utils.HttpRespSuccess(c, http.StatusOK, "Profile fetched successfully", gin.H{
 			"photo": user.ProfilePicture,
 			"nama":  user.Name,
 			"phone": user.Phone,
 			"email": user.Email,
-		}))
+			// "user": user,
+		})
 	})
 
 	// edit user profile
 	r.PATCH("/profile", Middleware.Authorization(), func(c *gin.Context) {
 		var input Model.UserUpdate
 		if err := c.BindJSON(&input); err != nil {
-			c.JSON(http.StatusUnprocessableEntity, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
@@ -54,7 +53,7 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 			Name:           input.Name,
 			Phone:          input.Phone,
 			Email:          input.Email,
-			Password:       Hash(input.Password),
+			Password:       Utils.Hash(input.Password),
 			Province:       input.Province,
 			City:           input.City,
 			Subdistrict:    input.Subdistrict,
@@ -64,14 +63,10 @@ func Profile(db *gorm.DB, q *gin.Engine) {
 		}
 
 		if err := db.Where("id = ?", ID).Model(&user).Updates(user).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, Utils.FailedResponse(err.Error()))
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		c.JSON(http.StatusOK, Utils.SucceededReponse("Profile updated successfully", gin.H{
-			"success": true,
-			"data":    user,
-		}))
-
+		Utils.HttpRespSuccess(c, http.StatusOK, "Profile updated successfully", user)
 	})
 }

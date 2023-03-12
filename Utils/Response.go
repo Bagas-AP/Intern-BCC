@@ -1,0 +1,47 @@
+package Utils
+
+import "github.com/gin-gonic/gin"
+
+type Response struct {
+	Success bool        `json:"success"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+	Error   interface{} `json:"error"`
+}
+
+// func FailedResponse(message string) Response {
+// 	return Response{
+// 		Success: false,
+// 		Message: message,
+// 		Body:    nil,
+// 	}
+// }
+
+// func SucceededReponse(message string, body interface{}) Response {
+// 	return Response{
+// 		Success: true,
+// 		Message: message,
+// 		Body:    body,
+// 	}
+// }
+
+func HttpRespSuccess(c *gin.Context, status int, message string, data interface{}) {
+	resp := Response{
+		Success: true,
+		Error:   nil,
+		Message: message,
+		Data:    data,
+	}
+
+	c.JSON(status, resp)
+}
+
+func HttpRespFailed(c *gin.Context, status int, message string) {
+	resp := Response{
+		Success: false,
+		Data:    nil,
+		Message: message,
+	}
+
+	c.JSON(status, resp)
+}
