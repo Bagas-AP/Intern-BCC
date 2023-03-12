@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Favourite(db *gorm.DB, q *gin.Engine) {
+func UserFavourite(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/user/fav")
 
 	// get all fav

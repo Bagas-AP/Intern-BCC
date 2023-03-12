@@ -49,10 +49,13 @@ func Init() {
 
 	Controller.Register(db, r)
 	Controller.Login(db, r)
-	Controller.Profile(db, r)
+	Controller.UserProfile(db, r)
 	Controller.UserLaundry(db, r)
 	Controller.UserCatering(db, r)
-	Controller.Favourite(db, r)
+	Controller.UserFavourite(db, r)
+	Controller.UserOrder(db, r)
 
-	r.Run(fmt.Sprintf(":%s", os.Getenv("PORT")))
+	if err := r.Run(fmt.Sprintf(":%s", os.Getenv("PORT"))); err != nil {
+		panic(err.Error())
+	}
 }

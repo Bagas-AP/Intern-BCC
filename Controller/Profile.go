@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func Profile(db *gorm.DB, q *gin.Engine) {
+func UserProfile(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api")
 
 	// see user profile
