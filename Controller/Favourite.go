@@ -13,7 +13,21 @@ import (
 
 func Favourite(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/user/fav")
-	// get catering menu by id
+
+	// get all fav
+	r.GET("/all", Middleware.Authorization(), func(c *gin.Context) {
+		ID, _ := c.Get("id")
+
+		var favourites []Model.Favourite
+		if res := db.Where("user_id = ?", ID.(uint)).Find(&favourites); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "Queried all favourite", favourites)
+	})
+
+	// add to fav catering menu by id
 	r.POST("/catering/:catering_id/cateringMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
 		ID, _ := c.Get("id")
 		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
@@ -42,7 +56,7 @@ func Favourite(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "Added new catering favourite", favourite)
 	})
 
-	// get laundry menu by id
+	// add to fav laundry menu by id
 	r.POST("/laundry/:laundry_id/laundryMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
 		ID, _ := c.Get("id")
 		laundryID, err := strconv.Atoi(c.Param("laundry_id"))
