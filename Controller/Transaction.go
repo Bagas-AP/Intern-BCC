@@ -1,10 +1,10 @@
 package Controller
 
 import (
-	"bcc/Config"
 	"bcc/Middleware"
 	"bcc/Model"
 	"bcc/Utils"
+	supabasestorageuploader "github.com/adityarizkyramadhan/supabase-storage-uploader"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -243,7 +243,13 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		SupaBaseClient := Config.MakeSupaBaseClient()
+		//SupaBaseClient := Config.MakeSupaBaseClient()
+		SupaBaseClient := supabasestorageuploader.NewSupabaseClient(
+			"https://llghldcosbvakddztrpt.supabase.co",
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZ2hsZGNvc2J2YWtkZHp0cnB0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3NzUwMjEzOCwiZXhwIjoxOTkzMDc4MTM4fQ.1fHxjZfPYIaTEEzEh9aUg5_T0yh-cyq5KG9KAbxt8C4",
+			"picture",
+			"",
+		)
 
 		link, err := SupaBaseClient.Upload(paymentProof)
 		if err != nil {
@@ -262,41 +268,41 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transaction)
 	})
 
-	r.POST("/catering/:catering_id/cateringMenu/:menu_index/uploadPaymentProof", Middleware.Authorization(), func(c *gin.Context) {
-		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		var menu Model.CateringMenu
-		if res := db.Where("catering_id = ?", cateringID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-			return
-		}
-
-		var user Model.User
-		ID, _ := c.Get("id")
-		if res := db.Where("id = ?", ID).First(&user); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-			return
-		}
-
-		var transaction Model.Transaction
-		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-		}
-
-		if err := db.Save(&transaction).Error; err != nil {
-			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transaction)
-	})
+	//r.POST("/catering/:catering_id/cateringMenu/:menu_index/uploadPaymentProof", Middleware.Authorization(), func(c *gin.Context) {
+	//	cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+	//	if err != nil {
+	//		Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+	//		return
+	//	}
+	//	menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+	//	if err != nil {
+	//		Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+	//		return
+	//	}
+	//
+	//	var menu Model.CateringMenu
+	//	if res := db.Where("catering_id = ?", cateringID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
+	//		Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+	//		return
+	//	}
+	//
+	//	var user Model.User
+	//	ID, _ := c.Get("id")
+	//	if res := db.Where("id = ?", ID).First(&user); res.Error != nil {
+	//		Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+	//		return
+	//	}
+	//
+	//	var transaction Model.Transaction
+	//	if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
+	//		Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+	//	}
+	//
+	//	if err := db.Save(&transaction).Error; err != nil {
+	//		Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+	//		return
+	//	}
+	//
+	//	Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transaction)
+	//})
 }
