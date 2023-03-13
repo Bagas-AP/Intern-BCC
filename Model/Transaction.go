@@ -21,8 +21,11 @@ type Transaction struct {
 	UpdateAt      time.Time
 }
 
-type TransactionInput struct {
-	Quantity      int    `json:"quantity"`
+type TransactionInputQuantity struct {
+	Quantity int `json:"quantity"`
+}
+
+type TransactionInputPayment struct {
 	PaymentMethod string `json:"payment_method"`
 }
 
@@ -31,7 +34,7 @@ type TransactionResult struct {
 	Phone           string `json:"phone"`
 	Address         string `json:"address"`
 	MenuName        string `json:"menu_name"`
-	MenuPrice       string `json:"menu_price"`
+	MenuPrice       int    `json:"menu_price"`
 	MenuExtendedFee int    `json:"menu_extended_fee"`
 	Total           int    `json:"total"`
 }
