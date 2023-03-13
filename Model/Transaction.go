@@ -13,12 +13,24 @@ type Transaction struct {
 	Model         int    `json:"model"` // 1 -> laundry, 2 -> catering
 	ServiceID     int    `json:"service_id"`
 	MenuID        int    `json:"menu_id"`
+	Notes         string `json:"notes"`
 	Quantity      int    `json:"quantity"`
 	Total         int    `json:"total"`
-	PaymentMethod string `json:"payment_method"`
-	PaymentPhoto  string `json:"payment_photo"`
+	PaymentMethod int    `json:"payment_method"`
+	PaymentProof  string `json:"payment_proof"`
 	CreatedAt     time.Time
 	UpdateAt      time.Time
+}
+
+type TransactionPayment struct {
+	PaymentDeadline time.Time `json:"payment_deadline"`
+	AccountNumber   string    `json:"account_number"`
+	AccountName     string    `json:"account_name"`
+	Total           int       `json:"total"`
+}
+
+type TransactionInputNotes struct {
+	Notes string `json:"notes"`
 }
 
 type TransactionInputQuantity struct {
@@ -26,7 +38,7 @@ type TransactionInputQuantity struct {
 }
 
 type TransactionInputPayment struct {
-	PaymentMethod string `json:"payment_method"`
+	PaymentMethod int `json:"payment_method"`
 }
 
 type TransactionResult struct {

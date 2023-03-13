@@ -36,6 +36,7 @@ func Init() {
 	}
 	db, err := Config.MakeLocalhostConnectionDatabase(databaseConf)
 	fmt.Println("Database Connected")
+
 	r := gin.Default()
 
 	// cors

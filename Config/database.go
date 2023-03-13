@@ -3,12 +3,23 @@ package Config
 import (
 	"bcc/Model"
 	"fmt"
+	supabasestorageuploader "github.com/adityarizkyramadhan/supabase-storage-uploader"
 	"log"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+func MakeSupaBaseClient() supabasestorageuploader.SupabaseClientService {
+	SupaBaseClient := supabasestorageuploader.NewSupabaseClient(
+		"https://llghldcosbvakddztrpt.supabase.co",
+		"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZ2hsZGNvc2J2YWtkZHp0cnB0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3NzUwMjEzOCwiZXhwIjoxOTkzMDc4MTM4fQ.1fHxjZfPYIaTEEzEh9aUg5_T0yh-cyq5KG9KAbxt8C4",
+		"picture",
+		"",
+	)
+	return SupaBaseClient
+}
 
 func MakeSupaBaseConnectionDatabase(data *Database) (*gorm.DB, error) {
 	// using supabase
