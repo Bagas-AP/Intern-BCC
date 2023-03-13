@@ -33,7 +33,7 @@ func MakeSupaBaseConnectionDatabase(data *Database) (*gorm.DB, error) {
 		&Model.LaundryMenu{},
 		&Model.LaundryPhotos{},
 		&Model.Favourite{},
-		&Model.UserOrder{},
+		&Model.Order{},
 	); err != nil {
 		return nil, err
 	}
@@ -66,7 +66,8 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 		&Model.CateringMenuDetailed{},
 		&Model.CateringTags{},
 		&Model.Favourite{},
-		&Model.UserOrder{},
+		&Model.Transaction{},
+		&Model.Order{},
 		//&Model.WalletTransaction{},
 		//&Model.Wallet{},
 	); err != nil {

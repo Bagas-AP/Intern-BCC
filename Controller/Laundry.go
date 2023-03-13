@@ -156,35 +156,4 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 
 		Utils.HttpRespSuccess(c, http.StatusOK, "Queried laundry by tags", laundries)
 	})
-
-	// add laundry order
-	r.POST("/laundry/:laundry_id/laundryMenu/:menu_id", Middleware.Authorization(), func(c *gin.Context) {
-		laundryID := c.Param("laundry_id")
-		id, isIdExists := c.Params.Get("menu_id")
-
-		if !isIdExists {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, "id not found")
-			return
-		}
-
-		var menu Model.LaundryMenu
-		if res := db.Where("laundry_id = ?", laundryID).Where("id = ?", id).First(&menu); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-			return
-		}
-
-		var input Model.InputLaundryOrder
-		if err := c.ShouldBindJSON(&input); err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		input = Model.InputLaundryOrder{
-			LaundryMenuID: int(menu.ID),
-			//LaundryID:     int(Utils.UintToString(id)),
-			Quantity: input.Quantity,
-		}
-
-		Utils.HttpRespSuccess(c, http.StatusOK, "Success get laundry menu by id", input)
-	})
 }

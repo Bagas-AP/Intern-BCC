@@ -54,6 +54,7 @@ func Init() {
 	Controller.UserCatering(db, r)
 	Controller.UserFavourite(db, r)
 	Controller.UserOrder(db, r)
+	Controller.UserTransaction(db, r)
 
 	if err := r.Run(fmt.Sprintf(":%s", os.Getenv("PORT"))); err != nil {
 		panic(err.Error())

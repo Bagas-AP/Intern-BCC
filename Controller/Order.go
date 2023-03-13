@@ -9,7 +9,10 @@ import (
 
 func UserOrder(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/user/order")
+
+	// get all order
 	r.GET("/all", func(c *gin.Context) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "Alive", nil)
 	})
+
 }
