@@ -43,6 +43,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		var input Model.TransactionInputQuantity
 		if err := c.BindJSON(&input); err != nil {
 			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
+			return
 		}
 
 		var existingTransaction Model.Transaction
@@ -52,14 +53,15 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		}
 
 		transaction := Model.Transaction{
-			ID:        uuid.New(),
-			UserID:    user.ID,
-			Model:     2,
-			ServiceID: int(cateringID),
-			MenuID:    int(menuIndex),
-			Quantity:  input.Quantity,
-			Total:     (menu.Price * input.Quantity) + ((menu.Price * input.Quantity) * 10 / 100),
-			CreatedAt: time.Now(),
+			ID:          uuid.New(),
+			UserID:      user.ID,
+			UserAddress: user.Province + user.City + user.Subdistrict + user.Address,
+			Model:       2,
+			ServiceID:   int(cateringID),
+			MenuID:      int(menuIndex),
+			Quantity:    input.Quantity,
+			Total:       (menu.Price * input.Quantity) + ((menu.Price * input.Quantity) * 10 / 100),
+			CreatedAt:   time.Now(),
 		}
 
 		if res := db.Create(&transaction); res.Error != nil {
@@ -97,6 +99,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		var transaction Model.Transaction
 		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
 		}
 
 		transactionResult := Model.TransactionResult{
@@ -109,7 +112,42 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			Total:           (menu.Price * transaction.Quantity) + ((menu.Price * transaction.Quantity) * 10 / 100),
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transactionResult)
+		Utils.HttpRespSuccess(c, http.StatusOK, "success get transaction detail", transactionResult)
+	})
+
+	r.POST("/catering/:catering_id/cateringMenu/:menu_index/changeAddress", Middleware.Authorization(), func(c *gin.Context) {
+		ID, _ := c.Get("id")
+		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		var transaction Model.Transaction
+		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", ID).First(&transaction); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
+		}
+
+		var input Model.TransactionChangeAddress
+		if err := c.BindJSON(&input); err != nil {
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
+			return
+		}
+
+		transaction.UserAddress = input.Province + input.City + input.Subdistrict + input.Address
+
+		if res := db.Save(&transaction); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, res.Error.Error())
+			return
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "success change address", transaction)
 	})
 
 	r.POST("/catering/:catering_id/cateringMenu/:menu_index/transactionDetailed", Middleware.Authorization(), func(c *gin.Context) {
@@ -140,6 +178,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		var transaction Model.Transaction
 		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
 		}
 
 		var input Model.TransactionInputPayment
@@ -155,7 +194,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transaction)
+		Utils.HttpRespSuccess(c, http.StatusOK, "successfully added transaction payment", transaction)
 	})
 
 	r.GET("/catering/:catering_id/cateringMenu/:menu_index/payment", Middleware.Authorization(), func(c *gin.Context) {
@@ -186,6 +225,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		var transaction Model.Transaction
 		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
 		}
 
 		transactionPayment := Model.TransactionPayment{
@@ -204,7 +244,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			transactionPayment.AccountName = "Messi"
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transactionPayment)
+		Utils.HttpRespSuccess(c, http.StatusOK, "detailed transaction", transactionPayment)
 	})
 
 	r.POST("/catering/:catering_id/cateringMenu/:menu_index/completePayment", Middleware.Authorization(), func(c *gin.Context) {
@@ -219,12 +259,6 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		var menu Model.CateringMenu
-		if res := db.Where("catering_id = ?", cateringID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-			return
-		}
-
 		var user Model.User
 		ID, _ := c.Get("id")
 		if res := db.Where("id = ?", ID).First(&user); res.Error != nil {
@@ -235,6 +269,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		var transaction Model.Transaction
 		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
 		}
 
 		paymentProof, err := c.FormFile("payment_proof")
@@ -265,44 +300,87 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transaction)
+		Utils.HttpRespSuccess(c, http.StatusOK, "added notes and payment proof", transaction)
 	})
 
-	//r.POST("/catering/:catering_id/cateringMenu/:menu_index/uploadPaymentProof", Middleware.Authorization(), func(c *gin.Context) {
-	//	cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
-	//	if err != nil {
-	//		Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-	//		return
-	//	}
-	//	menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
-	//	if err != nil {
-	//		Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-	//		return
-	//	}
-	//
-	//	var menu Model.CateringMenu
-	//	if res := db.Where("catering_id = ?", cateringID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
-	//		Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-	//		return
-	//	}
-	//
-	//	var user Model.User
-	//	ID, _ := c.Get("id")
-	//	if res := db.Where("id = ?", ID).First(&user); res.Error != nil {
-	//		Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-	//		return
-	//	}
-	//
-	//	var transaction Model.Transaction
-	//	if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
-	//		Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-	//	}
-	//
-	//	if err := db.Save(&transaction).Error; err != nil {
-	//		Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
-	//		return
-	//	}
-	//
-	//	Utils.HttpRespSuccess(c, http.StatusOK, "transaction detail", transaction)
-	//})
+	r.DELETE("/catering/:catering_id/cateringMenu/:menu_index/cancelPayment", Middleware.Authorization(), func(c *gin.Context) {
+		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		var user Model.User
+		ID, _ := c.Get("id")
+		if res := db.Where("id = ?", ID).First(&user); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
+		}
+
+		var transaction Model.Transaction
+		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
+		}
+
+		if err := db.Delete(&transaction).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "transaction deleted", nil)
+	})
+
+	r.POST("/catering/:catering_id/cateringMenu/:menu_index/confirmPayment", Middleware.Authorization(), func(c *gin.Context) {
+		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		var user Model.User
+		ID, _ := c.Get("id")
+		if res := db.Where("id = ?", ID).First(&user); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
+		}
+
+		var transaction Model.Transaction
+		if res := db.Where("service_id = ?", cateringID).Where("model = ?", 2).Where("menu_id = ?", menuIndex).Where("user_id = ?", user.ID).First(&transaction); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			return
+		}
+
+		newOrder := Model.Order{
+			ID:        uuid.New(),
+			UserID:    user.ID,
+			Model:     transaction.Model,
+			ServiceID: transaction.ServiceID,
+			MenuID:    transaction.MenuID,
+			Status:    1,
+			CreatedAt: time.Now(),
+		}
+
+		if err := db.Create(&newOrder).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if err := db.Delete(&transaction).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "order created", newOrder)
+	})
 }

@@ -10,6 +10,7 @@ type Transaction struct {
 	// di order itu cuma userid, transaction id, pokoknya cuma kek jembatan anatar aja
 	User          User   `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	UserID        uint   `json:"user_id"`
+	UserAddress   string `json:"user_address"`
 	Model         int    `json:"model"` // 1 -> laundry, 2 -> catering
 	ServiceID     int    `json:"service_id"`
 	MenuID        int    `json:"menu_id"`
@@ -29,16 +30,23 @@ type TransactionPayment struct {
 	Total           int       `json:"total"`
 }
 
+type TransactionChangeAddress struct {
+	Province    string `gorm:"not null;binding:required" json:"province"`
+	City        string `gorm:"not null;binding:required" json:"city"`
+	Subdistrict string `gorm:"not null;binding:required" json:"subdistrict"`
+	Address     string `gorm:"not null;size:100;binding:required" json:"address"` // Detailed Address
+}
+
 type TransactionInputNotes struct {
 	Notes string `json:"notes"`
 }
 
 type TransactionInputQuantity struct {
-	Quantity int `json:"quantity"`
+	Quantity int `gorm:"binding:required" json:"quantity"`
 }
 
 type TransactionInputPayment struct {
-	PaymentMethod int `json:"payment_method"`
+	PaymentMethod int `gorm:"binding:required" json:"payment_method"`
 }
 
 type TransactionResult struct {
