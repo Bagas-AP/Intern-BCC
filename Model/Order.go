@@ -26,4 +26,14 @@ type OrderResult struct {
 	ServiceName string `json:"service_name"`
 	MenuName    string `json:"menu_name"`
 	MenuPhoto   string `json:"menu_photo"`
+	Status      int    `json:"status"`
+	SellerPhone string `json:"seller_phone"`
+}
+
+type OrderInputRating struct {
+	Rating int `json:"rating"`
+}
+
+type OrderInputConfirm struct {
+	Confirm int `json:"confirm"`
 }

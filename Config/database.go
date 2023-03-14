@@ -79,6 +79,7 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 		&Model.Favourite{},
 		&Model.Transaction{},
 		&Model.Order{},
+		&Model.Rating{},
 		//&Model.WalletTransaction{},
 		//&Model.Wallet{},
 	); err != nil {

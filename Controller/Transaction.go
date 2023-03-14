@@ -278,7 +278,6 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		//SupaBaseClient := Config.MakeSupaBaseClient()
 		SupaBaseClient := supabasestorageuploader.NewSupabaseClient(
 			"https://llghldcosbvakddztrpt.supabase.co",
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZ2hsZGNvc2J2YWtkZHp0cnB0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3NzUwMjEzOCwiZXhwIjoxOTkzMDc4MTM4fQ.1fHxjZfPYIaTEEzEh9aUg5_T0yh-cyq5KG9KAbxt8C4",
