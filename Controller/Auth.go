@@ -3,6 +3,7 @@ package Controller
 import (
 	"bcc/Model"
 	"bcc/Utils"
+	"github.com/google/uuid"
 	"net/http"
 	"os"
 	"time"
@@ -36,6 +37,26 @@ func Register(db *gorm.DB, q *gin.Engine) {
 		if err := db.Create(&newUser).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
+		}
+
+		var wallet Model.Wallet
+
+		db.Where("user_id = ?", newUser.ID).First(&wallet)
+
+		if wallet.ID != uuid.Nil {
+			// The user already has a wallet
+			return
+		} else {
+			// The user does not have a wallet
+			newWallet := Model.Wallet{
+				ID:     uuid.New(),
+				UserID: newUser.ID,
+			}
+
+			if err := db.Create(&newWallet).Error; err != nil {
+				Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+				return
+			}
 		}
 
 		Utils.HttpRespSuccess(c, http.StatusCreated, "Account created", input)
