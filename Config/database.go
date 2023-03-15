@@ -37,8 +37,8 @@ func MakeSupaBaseConnectionDatabase(data *Database) (*gorm.DB, error) {
 
 	if err := db.AutoMigrate(
 		&Model.User{},
-		&Model.WalletTransaction{},
-		&Model.Wallet{},
+		//&Model.WalletTransaction{},
+		//&Model.Wallet{},
 		&Model.Seller{},
 		&Model.Laundry{},
 		&Model.LaundryMenu{},
@@ -81,10 +81,11 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 		&Model.Order{},
 		&Model.Rating{},
 		&Model.Wallet{},
-		&Model.WalletTransaction{},
 		&Model.WalletCategories{},
+		&Model.WalletTransaction{},
 	); err != nil {
 		return nil, err
 	}
+	log.Println("db migrated")
 	return db, nil
 }

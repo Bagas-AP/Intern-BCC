@@ -4,6 +4,7 @@ import (
 	"bcc/Middleware"
 	"bcc/Model"
 	"bcc/Utils"
+	"log"
 	"net/http"
 	"time"
 
@@ -17,6 +18,8 @@ func UserProfile(db *gorm.DB, q *gin.Engine) {
 	// see user profile
 	r.GET("/profile", Middleware.Authorization(), func(c *gin.Context) {
 		ID, _ := c.Get("id")
+		log.Println("id profile")
+		log.Println(ID)
 
 		var user Model.User
 		if err := db.Where("id = ?", ID).Take(&user).Error; err != nil {

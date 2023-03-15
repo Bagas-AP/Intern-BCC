@@ -56,7 +56,7 @@ func Init() {
 	Controller.UserFavourite(db, r)
 	Controller.UserTransaction(db, r)
 	Controller.UserOrder(db, r)
-	Controller.UserFinance(db, r)
+	Controller.UserWallet(db, r)
 
 	if err := r.Run(fmt.Sprintf(":%s", os.Getenv("PORT"))); err != nil {
 		panic(err.Error())

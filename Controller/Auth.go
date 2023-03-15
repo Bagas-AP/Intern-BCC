@@ -4,6 +4,7 @@ import (
 	"bcc/Model"
 	"bcc/Utils"
 	"github.com/google/uuid"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -34,14 +35,21 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			CreatedAt:   time.Now(),
 		}
 
+		log.Println("otw buat user")
 		if err := db.Create(&newUser).Error; err != nil {
+			log.Println("error di sini")
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
+		log.Println("user created but masuk ke wallet")
 		var wallet Model.Wallet
 
-		db.Where("user_id = ?", newUser.ID).First(&wallet)
+		if err := db.Where("user_id = ?", newUser.ID).First(&wallet).Error; err == nil {
+			log.Println("error di sini juga")
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+			return
+		}
 
 		if wallet.ID != uuid.Nil {
 			// The user already has a wallet
@@ -73,7 +81,7 @@ func Login(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		login := Model.User{}
+		var login Model.User
 		if err := db.Where("phone = ?", input.Phone).First(&login).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
 			return
