@@ -13,7 +13,7 @@ import (
 func UserLaundry(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/user")
 	// get all laundry
-	r.GET("/allLaundry", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/all-Laundry", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.Laundry
 		if err := db.Find(&laundries).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
@@ -24,7 +24,7 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// search laundry by name
-	r.POST("/searchLaundry", Middleware.Authorization(), func(c *gin.Context) {
+	r.POST("/search-Laundry", Middleware.Authorization(), func(c *gin.Context) {
 		var input Model.LaundrySearch
 
 		if err := c.BindJSON(&input); err != nil {
@@ -92,7 +92,7 @@ func UserLaundry(db *gorm.DB, q *gin.Engine) {
 	})
 
 	// search laundry by tag Cepat
-	r.GET("/searchLaundryTagCepat", Middleware.Authorization(), func(c *gin.Context) {
+	r.GET("/search-Laundry-TagCepat", Middleware.Authorization(), func(c *gin.Context) {
 		var laundries []Model.LaundryTags
 		if res := db.Where("tag = ?", "Cepat").Preload("Laundry.Seller").Find(&laundries); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())

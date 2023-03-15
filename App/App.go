@@ -50,6 +50,7 @@ func Init() {
 
 	Controller.Register(db, r)
 	Controller.Login(db, r)
+	Controller.ResetPassword(db, r)
 	Controller.UserProfile(db, r)
 	Controller.UserLaundry(db, r)
 	Controller.UserCatering(db, r)
