@@ -5,7 +5,6 @@ import (
 	"bcc/Model"
 	"bcc/Utils"
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -41,7 +40,7 @@ func UserFavourite(db *gorm.DB, q *gin.Engine) {
 					MenuPhoto: menu.Photo,
 				})
 
-			} else if fav.Model == 2 {
+			} else {
 				var menu Model.CateringMenu
 				if res := db.Where("catering_id = ?", fav.ServiceID).Where("menu_index = ?", fav.MenuID).First(&menu); res.Error != nil {
 					Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
@@ -61,29 +60,37 @@ func UserFavourite(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "Get all favourite", favResults)
 	})
 
-	// add to fav catering menu by id
-	r.POST("/catering/:catering_id/cateringMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
-		ID, _ := c.Get("id")
-		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
+	// add to fav menu by id
+	r.POST("/:model_id/:service_id/:menu_id/add", Middleware.Authorization(), func(c *gin.Context) {
+		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		favourite := Model.Favourite{
-			UserID:    ID.(uint),
-			Model:     2,
-			ServiceID: int(cateringID),
-			MenuID:    int(menuIndex),
+			UserID:    ID,
+			Model:     modelID,
+			ServiceID: int(serviceID),
+			MenuID:    int(menuID),
+		}
+
+		if modelID == 1 {
+			var isExistMenu Model.LaundryMenu
+			if err := db.Where("laundry_id = ?", serviceID).Where("menu_index = ?", menuID).First(&isExistMenu).Error; err != nil {
+				Utils.HttpRespFailed(c, http.StatusNotFound, "Menu doesn't exist")
+				return
+			}
+		} else if modelID == 2 {
+			var isExistMenu Model.CateringMenu
+			if err := db.Where("catering_id = ?", serviceID).Where("menu_index = ?", menuID).First(&isExistMenu).Error; err != nil {
+				Utils.HttpRespFailed(c, http.StatusNotFound, "Menu doesn't exist")
+				return
+			}
 		}
 
 		var isExistFavourite Model.Favourite
-		if err := db.Where("user_id = ?", ID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err == nil {
+		if err := db.Where("user_id = ?", ID).Where("model = ?", modelID).Where("service_id = ?", serviceID).Where("menu_id = ?", menuID).First(&isExistFavourite).Error; err == nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, "Menu already in favourite")
 			return
 		}
@@ -93,63 +100,22 @@ func UserFavourite(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "Added new catering menu favourite", favourite)
+		Utils.HttpRespSuccess(c, http.StatusOK, "Added new menu favourite", favourite)
 	})
 
-	// add to fav laundry menu by id
-	r.POST("/laundry/:laundry_id/laundryMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
-		ID, _ := c.Get("id")
-		laundryID, err := strconv.Atoi(c.Param("laundry_id"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-		menuIndex, err := strconv.Atoi(c.Param("menu_index"))
+	// remove favourite menu by id
+	r.DELETE("/:model_id/:service_id/:menu_id/delete", Middleware.Authorization(), func(c *gin.Context) {
+		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		favourite := Model.Favourite{
-			UserID:    ID.(uint),
-			Model:     1,
-			ServiceID: int(laundryID),
-			MenuID:    int(menuIndex),
-		}
-
-		var isExistFavourite Model.Favourite
-		if err := db.Where("user_id = ?", ID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err == nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, "Menu already in favourite")
-			return
-		}
-
-		if res := db.Create(&favourite); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
-			return
-		}
-
-		Utils.HttpRespSuccess(c, http.StatusOK, "Added new laundry menu favourite", favourite)
-	})
-
-	// remove favourite laundry menu by id
-	r.DELETE("/laundry/:laundry_id/laundryMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
-		ID, _ := c.Get("id")
-		laundryID, err := strconv.Atoi(c.Param("laundry_id"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-		menuIndex, err := strconv.Atoi(c.Param("menu_index"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		favourite := Model.Favourite{
-			UserID:    ID.(uint),
-			Model:     1,
-			ServiceID: laundryID,
-			MenuID:    menuIndex,
+			UserID:    ID,
+			Model:     modelID,
+			ServiceID: int(serviceID),
+			MenuID:    int(menuID),
 		}
 
 		var isExistFavourite Model.Favourite
@@ -163,41 +129,6 @@ func UserFavourite(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "removed laundry menu from favourite", "")
-	})
-
-	// remove favourite catering menu by id
-	r.DELETE("/catering/:catering_id/cateringMenu/:menu_index", Middleware.Authorization(), func(c *gin.Context) {
-		ID, _ := c.Get("id")
-		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		favourite := Model.Favourite{
-			UserID:    ID.(uint),
-			Model:     2,
-			ServiceID: int(cateringID),
-			MenuID:    int(menuIndex),
-		}
-
-		var isExistFavourite Model.Favourite
-		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).First(&isExistFavourite).Error; err != nil {
-			Utils.HttpRespFailed(c, http.StatusInternalServerError, "favourite doesn't exist")
-			return
-		}
-
-		if err := db.Where("user_id = ?", favourite.UserID).Where("model = ?", favourite.Model).Where("service_id = ?", favourite.ServiceID).Where("menu_id = ?", favourite.MenuID).Delete(&isExistFavourite).Error; err != nil {
-			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		Utils.HttpRespSuccess(c, http.StatusOK, "removed catering menu from favourite", "")
+		Utils.HttpRespSuccess(c, http.StatusOK, "removed menu from favourite", nil)
 	})
 }

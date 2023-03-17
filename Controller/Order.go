@@ -72,28 +72,15 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "Get all favourite", orderResults)
 	})
 
-	r.GET("/catering/:catering_id/cateringMenu/:menu_index/orderDetailed", Middleware.Authorization(), func(c *gin.Context) {
-		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+	r.GET("/:model_id/:service_id/:menu_id/orderDetailed", Middleware.Authorization(), func(c *gin.Context) {
+		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		//var menu Model.CateringMenu
-		//if res := db.Where("catering_id = ?", cateringID).Where("menu_index = ?", menuIndex).First(&menu); res.Error != nil {
-		//	Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
-		//	return
-		//}
-
-		ID, _ := c.Get("id")
 
 		var order Model.Order
-		if res := db.Where("user_id = ?", ID).Where("model = ?", 2).Where("service_id = ?", cateringID).Where("menu_id = ?", menuIndex).First(&order); res.Error != nil {
+		if res := db.Where("user_id = ?", ID).Where("model = ?", modelID).Where("service_id = ?", serviceID).Where("menu_id = ?", menuID).First(&order); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
@@ -105,7 +92,7 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 		var orderRes Model.OrderResult
 		var phone string
 
-		if order.Model == 1 {
+		if modelID == 1 {
 			if res := db.Where("id = ?", order.ServiceID).First(&laundry); res.Error != nil {
 				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 				return
@@ -116,7 +103,7 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 				return
 			}
 			phone = laundry.Phone
-			orderRes.ModelID = order.Model
+			orderRes.ModelID = modelID
 			orderRes.ServiceID = order.ServiceID
 			orderRes.MenuID = order.MenuID
 			orderRes.ServiceName = laundry.Name
@@ -125,7 +112,7 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 			orderRes.Status = order.Status
 			orderRes.SellerPhone = phone
 
-		} else if order.Model == 2 {
+		} else if modelID == 2 {
 			if res := db.Where("id = ?", order.ServiceID).First(&catering); res.Error != nil {
 				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 				return
@@ -149,19 +136,12 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "success get transaction detail", orderRes)
 	})
 
-	r.POST("/catering/:catering_id/cateringMenu/:menu_index/orderDone", Middleware.Authorization(), func(c *gin.Context) {
-		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+	r.POST("/:model_id/:service_id/:menu_id/order-done", Middleware.Authorization(), func(c *gin.Context) {
+		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
 		}
-		menuIndex, err := Utils.ParseStrToUint(c.Param("menu_index"))
-		if err != nil {
-			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		ID, _ := c.Get("id")
 
 		var input Model.OrderInputConfirm
 		if err := c.BindJSON(&input); err != nil {
@@ -171,16 +151,11 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 
 		if input.Confirm == 1 {
 			var order Model.Order
-			if res := db.Where("user_id = ?", ID).Where("model = ?", 2).Where("service_id = ?", cateringID).Where("menu_id = ?", menuIndex).First(&order); res.Error != nil {
+			if res := db.Where("user_id = ?", ID).Where("model = ?", modelID).Where("service_id = ?", serviceID).Where("menu_id = ?", menuID).First(&order); res.Error != nil {
 				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 				return
 			}
-			//order.CompletedAt = time.Now()
 
-			//if res := db.Save(&order); res.Error != nil {
-			//	Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
-			//	return
-			//}
 			if res := db.Delete(&order); res.Error != nil {
 				Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
 				return
@@ -194,14 +169,14 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 		}
 	})
 
-	r.POST("/catering/:catering_id/cateringMenu/:menu_index/rating", Middleware.Authorization(), func(c *gin.Context) {
-		var input Model.OrderInputRating
+	r.POST("/:model_id/:service_id/:menu_id/rate", Middleware.Authorization(), func(c *gin.Context) {
+		var input Model.InputRating
 		if err := c.BindJSON(&input); err != nil {
 			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
 			return
 		}
 
-		cateringID, err := Utils.ParseStrToUint(c.Param("catering_id"))
+		ID, modelID, serviceID, _, err := Utils.ParseIDs(c)
 		if err != nil {
 			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
 			return
@@ -210,31 +185,45 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 		var sumRating float64
 		var count int64
 
-		if err := db.Table("ratings").Where("model = ? AND service_id = ?", 2, cateringID).Select("AVG(rating) as rating, COUNT(*) as count").Row().Scan(&sumRating, &count); err != nil {
+		if err := db.Table("ratings").Where("model = ?", modelID).Where("service_id = ?", serviceID).
+			Select("COALESCE(AVG(rating), 0) as rating, COUNT(*) as count").Row().Scan(&sumRating, &count); err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		rating := (sumRating + float64(input.Rating)) / float64(count+1)
 
-		var catering Model.Catering
-		if res := db.Where("id = ?", cateringID).First(&catering); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+		if modelID == 1 {
+			var laundry Model.Laundry
+			if res := db.Where("id = ?", serviceID).First(&laundry); res.Error != nil {
+				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			}
+
+			laundry.Rating = float64(rating)
+
+			if res := db.Save(&laundry); res.Error != nil {
+				Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
+				return
+			}
+		} else if modelID == 2 {
+			var catering Model.Catering
+			if res := db.Where("id = ?", serviceID).First(&catering); res.Error != nil {
+				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
+			}
+
+			catering.Rating = float64(rating)
+
+			if res := db.Save(&catering); res.Error != nil {
+				Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
+				return
+			}
 		}
 
-		catering.Rating = int(rating)
-
-		if res := db.Save(&catering); res.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusInternalServerError, res.Error.Error())
-			return
-		}
-
-		ID, _ := c.Get("id")
 		newRating := Model.Rating{
-			UserID:    ID.(uint),
-			Model:     2,
-			ServiceID: int(cateringID),
-			Rating:    input.Rating,
+			UserID:    ID,
+			Model:     modelID,
+			ServiceID: int(serviceID),
+			Rating:    float64(input.Rating),
 		}
 
 		if res := db.Create(&newRating); res.Error != nil {
@@ -242,6 +231,6 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "success rating", catering)
+		Utils.HttpRespSuccess(c, http.StatusOK, "success rating", newRating)
 	})
 }

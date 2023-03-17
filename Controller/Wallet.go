@@ -4,12 +4,13 @@ import (
 	"bcc/Middleware"
 	"bcc/Model"
 	"bcc/Utils"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func UserWallet(db *gorm.DB, q *gin.Engine) {
@@ -24,7 +25,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "queried wallet categories", categories)
 	})
 
-	r.POST("/newCategory", Middleware.Authorization(), func(c *gin.Context) {
+	r.POST("/new-category", Middleware.Authorization(), func(c *gin.Context) {
 		var input Model.WalletCategoryInput
 		if err := c.BindJSON(&input); err != nil {
 			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
@@ -117,7 +118,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "added new expense transaction", transaction)
 	})
 
-	r.DELETE("/category/:id/deleteCategory", Middleware.Authorization(), func(c *gin.Context) {
+	r.DELETE("/category/:id/delete-category", Middleware.Authorization(), func(c *gin.Context) {
 		index := c.Param("id")
 		ID, _ := c.Get("id")
 
