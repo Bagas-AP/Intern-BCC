@@ -6,7 +6,7 @@ type CateringMenu struct {
 	CateringID  uint     `json:"catering_id"`
 	MenuIndex   int      `json:"menu_index"`
 	Name        string   `gorm:"size:30;not null" json:"name"`
-	Description string   `gorm:"size:255" json:"description"`
+	Description string   `gorm:"size:1000000" json:"description"`
 	Price       int      `json:"price"`
 	Photo       string   `json:"photo"`
 }

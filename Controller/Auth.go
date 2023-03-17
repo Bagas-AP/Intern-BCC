@@ -3,11 +3,12 @@ package Controller
 import (
 	"bcc/Model"
 	"bcc/Utils"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -52,10 +53,8 @@ func Register(db *gorm.DB, q *gin.Engine) {
 		}
 
 		if wallet.ID != uuid.Nil {
-			// The user already has a wallet
 			return
 		} else {
-			// The user does not have a wallet
 			newWallet := Model.Wallet{
 				ID:     uuid.New(),
 				UserID: newUser.ID,
@@ -108,5 +107,37 @@ func Login(db *gorm.DB, q *gin.Engine) {
 			Utils.HttpRespFailed(c, http.StatusForbidden, "Wrong password")
 			return
 		}
+	})
+}
+
+func ResetPassword(db *gorm.DB, q *gin.Engine) {
+	r := q.Group("/api")
+	// reset password via email
+	r.POST("/reset-password", func(c *gin.Context) {
+		var input Model.ResetPasswordInput
+		if err := c.BindJSON(&input); err != nil {
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
+			return
+		}
+
+		var user Model.User
+		if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		newRandomPassword := Utils.GenerateRandomPassword()
+
+		user.Password = Utils.Hash(newRandomPassword)
+
+		if err := db.Save(&user).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+		}
+
+		if err := Utils.SendToEmail(db, input.Email, newRandomPassword); err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "Password reset", nil)
 	})
 }

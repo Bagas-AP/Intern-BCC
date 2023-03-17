@@ -35,6 +35,9 @@ func Init() {
 		panic(err.Error())
 	}
 	db, err := Config.MakeLocalhostConnectionDatabase(databaseConf)
+	if err != nil {
+		return
+	}
 	fmt.Println("Database Connected")
 
 	r := gin.Default()
@@ -51,8 +54,10 @@ func Init() {
 	Controller.Register(db, r)
 	Controller.Login(db, r)
 	Controller.UserProfile(db, r)
-	Controller.UserLaundry(db, r)
-	Controller.UserCatering(db, r)
+	Controller.ResetPassword(db, r)
+	Controller.UserHome(db, r)
+	// Controller.UserLaundry(db, r)
+	// Controller.UserCatering(db, r)
 	Controller.UserFavourite(db, r)
 	Controller.UserTransaction(db, r)
 	Controller.UserOrder(db, r)
