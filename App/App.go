@@ -19,26 +19,26 @@ func Init() {
 	}
 
 	// supabase
-	//databaseConf, err := Config.NewDatabase()
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//db, err := Config.MakeSupaBaseConnectionDatabase(databaseConf)
-	//if err != nil {
-	//	panic(err.Error())
-	//}
-	//fmt.Println("Database Connected")
-
-	// localhost
-	databaseConf, err := Config.NewDBLocal()
+	databaseConf, err := Config.NewDatabase()
 	if err != nil {
 		panic(err.Error())
 	}
-	db, err := Config.MakeLocalhostConnectionDatabase(databaseConf)
+	db, err := Config.MakeSupaBaseConnectionDatabase(databaseConf)
 	if err != nil {
-		return
+		panic(err.Error())
 	}
-	fmt.Println("Database Connected")
+	//fmt.Println("Database Connected")
+
+	// localhost
+	// databaseConf, err := Config.NewDBLocal()
+	// if err != nil {
+	// 	panic(err.Error())
+	// }
+	// db, err := Config.MakeLocalhostConnectionDatabase(databaseConf)
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Println("Database Connected")
 
 	r := gin.Default()
 
@@ -56,8 +56,6 @@ func Init() {
 	Controller.UserProfile(db, r)
 	Controller.ResetPassword(db, r)
 	Controller.UserHome(db, r)
-	// Controller.UserLaundry(db, r)
-	// Controller.UserCatering(db, r)
 	Controller.UserFavourite(db, r)
 	Controller.UserTransaction(db, r)
 	Controller.UserOrder(db, r)

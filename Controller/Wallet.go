@@ -69,7 +69,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		ID, _ := c.Get("id")
 
 		var category Model.WalletCategories
-		if res := db.Preload("WalletTransactions").Where("`index` = ?", index).Where("user_id = ?", ID).First(&category); res.Error != nil {
+		if res := db.Preload("WalletTransactions").Where("index = ?", index).Where("user_id = ?", ID).First(&category); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
@@ -77,12 +77,12 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "queried wallet category", category)
 	})
 
-	r.POST("/category/:id/addTransaction", Middleware.Authorization(), func(c *gin.Context) {
+	r.POST("/category/:id/add-transaction", Middleware.Authorization(), func(c *gin.Context) {
 		index := c.Param("id")
 		ID, _ := c.Get("id")
 
 		var category Model.WalletCategories
-		if res := db.Preload("WalletTransactions").Where("`index` = ?", index).Where("user_id = ?", ID).First(&category); res.Error != nil {
+		if res := db.Preload("WalletTransactions").Where("index = ?", index).Where("user_id = ?", ID).First(&category); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
@@ -123,20 +123,30 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		ID, _ := c.Get("id")
 
 		var category Model.WalletCategories
-		if res := db.Preload("WalletTransactions").Where("`index` = ?", index).Where("user_id = ?", ID).First(&category); res.Error != nil {
+		if res := db.Where("index = ?", index).Where("user_id = ?", ID).First(&category); res.Error != nil {
 			Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 			return
 		}
 
-		if err := db.Model(&category).Association("WalletTransactions").Clear(); err != nil {
+		var transactions []Model.WalletTransaction
+		if res := db.Where("wallet_id = ?", category.WalletID).Find(&transactions); res.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusForbidden, res.Error.Error())
 			return
 		}
 
-		if result := db.Delete(&category); result.Error != nil {
-			Utils.HttpRespFailed(c, http.StatusNotFound, result.Error.Error())
+		if len(transactions) > 0 {
+			if err := db.Delete(&transactions); err.Error != nil {
+				Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error.Error())
+				return
+			}
+		}
+
+		if err := db.Delete(&category); err.Error != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error.Error())
 			return
 		}
 
 		Utils.HttpRespSuccess(c, http.StatusOK, "deleted wallet category", category)
 	})
+
 }

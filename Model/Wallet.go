@@ -1,8 +1,9 @@
 package Model
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type Wallet struct {
@@ -14,8 +15,8 @@ type Wallet struct {
 
 type WalletCategories struct {
 	ID                 uuid.UUID           `gorm:"primaryKey" json:"id"`
-	WalletID           uuid.UUID           `gorm:"type:uuid;index" json:"wallet_id"`
 	Wallet             Wallet              `gorm:"foreignKey:WalletID"`
+	WalletID           uuid.UUID           `gorm:"type:uuid;index" json:"wallet_id"`
 	User               User                `gorm:"ForeignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	UserID             uint                `json:"user_id"`
 	Index              int                 `json:"index"`

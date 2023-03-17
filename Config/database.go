@@ -86,6 +86,5 @@ func MakeLocalhostConnectionDatabase(data *DBLocal) (*gorm.DB, error) {
 	); err != nil {
 		return nil, err
 	}
-	log.Println("db migrated")
 	return db, nil
 }

@@ -3,7 +3,6 @@ package Controller
 import (
 	"bcc/Model"
 	"bcc/Utils"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -36,18 +35,14 @@ func Register(db *gorm.DB, q *gin.Engine) {
 			CreatedAt:   time.Now(),
 		}
 
-		log.Println("otw buat user")
 		if err := db.Create(&newUser).Error; err != nil {
-			log.Println("error di sini")
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		log.Println("user created but masuk ke wallet")
 		var wallet Model.Wallet
 
 		if err := db.Where("user_id = ?", newUser.ID).First(&wallet).Error; err == nil {
-			log.Println("error di sini juga")
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}

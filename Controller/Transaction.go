@@ -4,6 +4,7 @@ import (
 	"bcc/Middleware"
 	"bcc/Model"
 	"bcc/Utils"
+	"log"
 	"net/http"
 	"time"
 
@@ -259,6 +260,9 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			transactionPayment.AccountNumber = "2123982139"
 			transactionPayment.AccountName = "Messi"
 		}
+
+		log.Println(transactionPayment.AccountName)
+		log.Println(transactionPayment.AccountNumber)
 
 		Utils.HttpRespSuccess(c, http.StatusOK, "detailed transaction", transactionPayment)
 	})
