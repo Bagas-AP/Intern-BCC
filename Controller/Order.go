@@ -44,6 +44,7 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 					ServiceName: laundry.Name,
 					MenuName:    menu.Name,
 					MenuPhoto:   menu.Photo,
+					SellerPhone: laundry.Phone,
 				})
 
 			} else if order.Model == 2 {
@@ -65,6 +66,7 @@ func UserOrder(db *gorm.DB, q *gin.Engine) {
 					ServiceName: catering.Name,
 					MenuName:    menu.Name,
 					MenuPhoto:   menu.Photo,
+					SellerPhone: catering.Phone,
 				})
 			}
 		}

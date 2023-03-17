@@ -72,4 +72,29 @@ func UserProfile(db *gorm.DB, q *gin.Engine) {
 
 		Utils.HttpRespSuccess(c, http.StatusOK, "Profile updated successfully", user)
 	})
+
+	r.POST("/support", Middleware.Authorization(), func(c *gin.Context) {
+		ID, _, _, _, err := Utils.ParseIDs(c)
+		if err != nil {
+			Utils.HttpRespFailed(c, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		var input Model.Support
+		if err := c.BindJSON(&input); err != nil {
+			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
+		}
+
+		support := Model.Support{
+			UserID:    ID,
+			Help:      input.Help,
+			CreatedAt: time.Now(),
+		}
+
+		if err := db.Create(&support).Error; err != nil {
+			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
+		}
+
+		Utils.HttpRespSuccess(c, http.StatusOK, "Support created successfully", support)
+	})
 }
