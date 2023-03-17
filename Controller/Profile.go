@@ -35,7 +35,6 @@ func UserProfile(db *gorm.DB, q *gin.Engine) {
 
 	// edit user profile
 	r.PATCH("/profile", Middleware.Authorization(), func(c *gin.Context) {
-		// handler
 		var input Model.UserUpdate
 		if err := c.BindJSON(&input); err != nil {
 			Utils.HttpRespFailed(c, http.StatusUnprocessableEntity, err.Error())
@@ -43,9 +42,7 @@ func UserProfile(db *gorm.DB, q *gin.Engine) {
 		}
 
 		ID, _ := c.Get("id")
-		// end handler
 
-		// usecase
 		user := Model.User{
 			Name:           input.Name,
 			Phone:          input.Phone,
@@ -58,18 +55,16 @@ func UserProfile(db *gorm.DB, q *gin.Engine) {
 			ProfilePicture: input.ProfilePicture,
 			UpdatedAt:      time.Now(),
 		}
-		// end usecase
 
-		// repo
 		if err := db.Where("id = ?", ID).Model(&user).Updates(user).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
 			return
 		}
-		// end repo
 
 		Utils.HttpRespSuccess(c, http.StatusOK, "Profile updated successfully", user)
 	})
 
+	// user create a support tiket
 	r.POST("/user/support", Middleware.Authorization(), func(c *gin.Context) {
 		ID, _, _, _, err := Utils.ParseIDs(c)
 		if err != nil {

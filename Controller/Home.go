@@ -5,6 +5,7 @@ import (
 	"bcc/Model"
 	"bcc/Utils"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -12,6 +13,7 @@ import (
 
 func UserHome(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/user/home")
+	// get all service based on model
 	r.GET("/:model_id/all", Middleware.Authorization(), func(c *gin.Context) {
 		modelID := c.Param("model_id")
 
@@ -35,6 +37,7 @@ func UserHome(db *gorm.DB, q *gin.Engine) {
 		}
 	})
 
+	// get all service based on model and name
 	r.POST("/:model_id/search", Middleware.Authorization(), func(c *gin.Context) {
 		var input Model.UserInput
 		if err := c.BindJSON(&input); err != nil {
@@ -47,15 +50,14 @@ func UserHome(db *gorm.DB, q *gin.Engine) {
 		var laundries []Model.Laundry
 		var caterings []Model.Catering
 		if modelID == "1" {
-			if res := db.Where("name LIKE ?", "%"+input.Name+"%").Find(&laundries); res.Error != nil {
+			if res := db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(input.Name)+"%").Find(&laundries); res.Error != nil {
 				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 				return
 			}
-
 			Utils.HttpRespSuccess(c, http.StatusFound, "Queried all laundry", laundries)
 
 		} else if modelID == "2" {
-			if res := db.Where("name LIKE ?", "%"+input.Name+"%").Find(&caterings); res.Error != nil {
+			if res := db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(input.Name)+"%").Find(&caterings); res.Error != nil {
 				Utils.HttpRespFailed(c, http.StatusNotFound, res.Error.Error())
 				return
 			}
@@ -64,6 +66,7 @@ func UserHome(db *gorm.DB, q *gin.Engine) {
 		}
 	})
 
+	// get all service based on model and service id
 	r.GET("/:model_id/:service_id", Middleware.Authorization(), func(c *gin.Context) {
 		modelID := c.Param("model_id")
 		serviceID := c.Param("service_id")
@@ -116,6 +119,7 @@ func UserHome(db *gorm.DB, q *gin.Engine) {
 		}
 	})
 
+	// get all service based on model, service id, and menu id
 	r.GET("/:model_id/:service_id/:menu_id", Middleware.Authorization(), func(c *gin.Context) {
 		modelID := c.Param("model_id")
 		serviceID := c.Param("service_id")
@@ -141,6 +145,7 @@ func UserHome(db *gorm.DB, q *gin.Engine) {
 		}
 	})
 
+	// get all service based on model, service id, and detailed menu id
 	r.GET("/:model_id/:service_id/:menu_id/detailed", Middleware.Authorization(), func(c *gin.Context) {
 		modelID := c.Param("model_id")
 		serviceID := c.Param("service_id")
@@ -166,6 +171,7 @@ func UserHome(db *gorm.DB, q *gin.Engine) {
 		}
 	})
 
+	// get all service based on model and tags
 	r.GET("/:model_id/tag/:tag", Middleware.Authorization(), func(c *gin.Context) {
 		modelID := c.Param("model_id")
 		tag := c.Param("tag")

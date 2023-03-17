@@ -9,22 +9,6 @@ type Response struct {
 	Error   interface{} `json:"error"`
 }
 
-// func FailedResponse(message string) Response {
-// 	return Response{
-// 		Success: false,
-// 		Message: message,
-// 		Body:    nil,
-// 	}
-// }
-
-// func SucceededReponse(message string, body interface{}) Response {
-// 	return Response{
-// 		Success: true,
-// 		Message: message,
-// 		Body:    body,
-// 	}
-// }
-
 func HttpRespSuccess(c *gin.Context, status int, message string, data interface{}) {
 	resp := Response{
 		Success: true,

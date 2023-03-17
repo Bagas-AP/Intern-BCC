@@ -15,6 +15,7 @@ import (
 
 func UserWallet(db *gorm.DB, q *gin.Engine) {
 	r := q.Group("/api/user/finance")
+	// get all wallet categories
 	r.GET("/all", func(c *gin.Context) {
 		var categories []Model.WalletCategories
 		if res := db.Find(&categories); res.Error != nil {
@@ -25,6 +26,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "queried wallet categories", categories)
 	})
 
+	// create new wallet category
 	r.POST("/new-category", Middleware.Authorization(), func(c *gin.Context) {
 		var input Model.WalletCategoryInput
 		if err := c.BindJSON(&input); err != nil {
@@ -64,6 +66,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "created new wallet category", newCategory)
 	})
 
+	// get wallet category by id and all its details
 	r.GET("/category/:id", Middleware.Authorization(), func(c *gin.Context) {
 		index := c.Param("id")
 		ID, _ := c.Get("id")
@@ -77,6 +80,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "queried wallet category", category)
 	})
 
+	// add new transaction to wallet category by id
 	r.POST("/category/:id/add-transaction", Middleware.Authorization(), func(c *gin.Context) {
 		index := c.Param("id")
 		ID, _ := c.Get("id")
@@ -118,6 +122,7 @@ func UserWallet(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "added new expense transaction", transaction)
 	})
 
+	// delete wallet category by id
 	r.DELETE("/category/:id/delete-category", Middleware.Authorization(), func(c *gin.Context) {
 		index := c.Param("id")
 		ID, _ := c.Get("id")

@@ -2,7 +2,6 @@ package Middleware
 
 import (
 	"bcc/Utils"
-	"log"
 	"net/http"
 	"os"
 
@@ -28,7 +27,6 @@ func Authorization() gin.HandlerFunc {
 			c.Next()
 			return
 		} else {
-			log.Println("masuk ke else")
 			Utils.HttpRespFailed(c, http.StatusForbidden, err.Error())
 			c.Abort()
 			return

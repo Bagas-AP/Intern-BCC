@@ -11,7 +11,7 @@ type User struct {
 	Province       string `gorm:"not null;binding:required" json:"province"`
 	City           string `gorm:"not null;binding:required" json:"city"`
 	Subdistrict    string `gorm:"not null;binding:required" json:"subdistrict"`
-	Address        string `gorm:"not null;size:100;binding:required" json:"address"` // Detailed Address
+	Address        string `gorm:"not null;size:100;binding:required" json:"address"`
 	ProfilePicture string `json:"profile_picture"`
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
@@ -25,7 +25,7 @@ type UserRegister struct {
 	Province    string `json:"province"`
 	City        string `json:"city"`
 	Subdistrict string `json:"subdistrict"`
-	Address     string `gorm:"not null;size:100" json:"address"` // Detailed Address
+	Address     string `gorm:"not null;size:100" json:"address"`
 }
 
 type UserUpdate struct {
@@ -36,7 +36,7 @@ type UserUpdate struct {
 	Province       string `json:"province"`
 	City           string `json:"city"`
 	Subdistrict    string `json:"subdistrict"`
-	Address        string `gorm:"not null;size:100" json:"address"` // Detailed Address
+	Address        string `gorm:"not null;size:100" json:"address"`
 	ProfilePicture string `json:"profile_picture"`
 }
 

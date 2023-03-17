@@ -4,7 +4,6 @@ import (
 	"bcc/Middleware"
 	"bcc/Model"
 	"bcc/Utils"
-	"log"
 	"net/http"
 	"time"
 
@@ -86,6 +85,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusCreated, "created new transaction", transaction)
 	})
 
+	// user change address
 	r.POST("/:model_id/:service_id/:menu_id/change-address", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
@@ -118,6 +118,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "success change address", transaction)
 	})
 
+	// get transaction
 	r.GET("/:model_id/:service_id/:menu_id/transaction-detailed", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
@@ -177,6 +178,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "success get transaction detail", transactionResult)
 	})
 
+	// add payment method
 	r.POST("/:model_id/:service_id/:menu_id/add-payment-method", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
@@ -226,6 +228,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "successfully added transaction payment", transaction)
 	})
 
+	// get payment method
 	r.GET("/:model_id/:service_id/:menu_id/payment", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
@@ -261,12 +264,10 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 			transactionPayment.AccountName = "Messi"
 		}
 
-		log.Println(transactionPayment.AccountName)
-		log.Println(transactionPayment.AccountNumber)
-
 		Utils.HttpRespSuccess(c, http.StatusOK, "detailed transaction", transactionPayment)
 	})
 
+	// complete payment
 	r.POST("/:model_id/:service_id/:menu_id//complete-payment", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
@@ -287,9 +288,9 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		}
 
 		SupaBaseClient := supabasestorageuploader.NewSupabaseClient(
-			"https://llghldcosbvakddztrpt.supabase.co",
-			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsZ2hsZGNvc2J2YWtkZHp0cnB0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3NzUwMjEzOCwiZXhwIjoxOTkzMDc4MTM4fQ.1fHxjZfPYIaTEEzEh9aUg5_T0yh-cyq5KG9KAbxt8C4",
-			"picture",
+			"https://flldkbhntqqaiflpxlhg.supabase.co",
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsbGRrYmhudHFxYWlmbHB4bGhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTY3NzU4Njk4OCwiZXhwIjoxOTkzMTYyOTg4fQ.CezKv4eOdEOyPEnVCqp3i0rNRLpz4MJOgL2GvM74QtQ",
+			"photo",
 			"",
 		)
 
@@ -310,6 +311,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "added notes and payment proof", transaction)
 	})
 
+	// cancel payment
 	r.DELETE("/:model_id/:service_id/:menu_id/cancel-payment", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {
@@ -331,6 +333,7 @@ func UserTransaction(db *gorm.DB, q *gin.Engine) {
 		Utils.HttpRespSuccess(c, http.StatusOK, "transaction deleted", nil)
 	})
 
+	// get detailed transaction
 	r.GET("/:model_id/:service_id/:menu_id/confirm-payment", Middleware.Authorization(), func(c *gin.Context) {
 		ID, modelID, serviceID, menuID, err := Utils.ParseIDs(c)
 		if err != nil {

@@ -10,6 +10,7 @@ type Catering struct {
 	Instagram  string  `json:"instagram"`
 	Phone      string  `json:"phone"`
 	PriceRange string  `json:"price_range"`
+	Picture    string  `json:"picture"`
 }
 
 type CateringSearch struct {
