@@ -4,13 +4,14 @@ import (
 	"bcc/Model"
 	"bcc/Utils"
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"math/rand"
 	"net/http"
 	"net/smtp"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -115,7 +116,7 @@ func Login(db *gorm.DB, q *gin.Engine) {
 }
 
 func ResetPassword(db *gorm.DB, q *gin.Engine) {
-	r := q.Group("/api/user")
+	r := q.Group("/api")
 	r.POST("/reset-password", func(c *gin.Context) {
 		var input Model.ResetPasswordInput
 		if err := c.BindJSON(&input); err != nil {
@@ -129,61 +130,48 @@ func ResetPassword(db *gorm.DB, q *gin.Engine) {
 			return
 		}
 
-		forgotPW := Model.ResetPassword{
-			UserID: user.ID,
-			Phone:  user.Phone,
-			Code:   generateRandomCode(),
-		}
+		newRandomPassword := generateRandomPassword()
 
-		var check Model.ResetPassword
-		if err := db.Where("user_id = ?", user.ID).First(&check).Error; err == nil {
-			Utils.HttpRespFailed(c, http.StatusForbidden, "You already requested a reset password")
-			return
-		}
+		user.Password = Utils.Hash(newRandomPassword)
 
-		if err := db.Create(&forgotPW).Error; err != nil {
+		if err := db.Save(&user).Error; err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
-			return
 		}
 
-		if err := sendCodeToEmail(user.Email, forgotPW.Code); err != nil {
+		if err := SendToEmail(db, input.Email, newRandomPassword); err != nil {
 			Utils.HttpRespFailed(c, http.StatusInternalServerError, err.Error())
-			return
 		}
 
-		Utils.HttpRespSuccess(c, http.StatusOK, "Reset password code sent", gin.H{
-			"code": forgotPW.Code,
-		})
+		Utils.HttpRespSuccess(c, http.StatusOK, "Password reset", nil)
 	})
 }
 
-func sendCodeToEmail(email, code string) error {
-	from := os.Getenv("EMAIL")              // Replace with your email address
-	password := os.Getenv("EMAIL_PASSWORD") // Replace with your email password
-	to := email
-
-	// Message to be sent
-	subject := "One-Time Code"
-	body := fmt.Sprintf("Your one-time code is: %s", code)
-	message := fmt.Sprintf("Subject: %s\n\n%s", subject, body)
-
-	// SMTP configuration
-	smtpHost := "smtp.gmail.com"
-	smtpPort := "587"
-
-	// Authentication
-	auth := smtp.PlainAuth("", from, password, smtpHost)
-
-	// Sending email
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, []string{to}, []byte(message))
-	if err != nil {
+func SendToEmail(db *gorm.DB, email string, password string) error {
+	var user Model.User
+	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
 		return err
 	}
 
-	return nil
+	auth := smtp.PlainAuth("", os.Getenv("EMAIL"), os.Getenv("EMAIL_PASS_APP"), "smtp.gmail.com")
+
+	message := fmt.Sprintf(
+		"From: %s\r\nTo: %s\r\nSubject: Password Reset\r\n\r\n"+
+			"Dear User,\r\n\r\n"+
+			"We have received a request to reset your password for your account associated with this email. Please find below the details of the new password.\r\n\r\n"+
+			"Phone: %s\r\n"+
+			"Email: %s\r\n"+
+			"New Password: %s\r\n\r\n"+
+			"If you did not make this request, please contact our support team immediately.\r\n\r\n"+
+			"Best regards,\r\n"+
+			"%s",
+		os.Getenv("EMAIL"), email, user.Phone, email, password, "TriServe",
+	)
+
+	err := smtp.SendMail("smtp.gmail.com"+":"+"587", auth, os.Getenv("EMAIL_FROM"), []string{email}, []byte(message))
+	return err
 }
 
-func generateRandomCode() string {
+func generateRandomPassword() string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const codeLength = 10
 	rand.Seed(time.Now().UnixNano())
